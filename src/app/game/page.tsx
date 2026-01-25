@@ -31,7 +31,7 @@ export default async function GamePage() {
 
             <BingoGrid
                 participant={state.participant}
-                config={state.config}
+                session={state.session}
             />
         </div>
     );
