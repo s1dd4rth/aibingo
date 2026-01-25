@@ -33,7 +33,7 @@ export default function LeaderboardView({ initialData }: { initialData: Leaderbo
                 <div className="flex items-center justify-between mb-8">
                     {!isPresenter && (
                         <Link
-                            href="/"
+                            href="/game"
                             className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
                         >
                             <ArrowLeft className="w-5 h-5" />
