@@ -15,19 +15,25 @@ export async function GET(request: NextRequest) {
 
     try {
         // Verify JWT token
+        console.log('🔍 Attempting to verify token...');
         const email = verifyMagicLinkToken(token);
 
         if (!email) {
             // Token is invalid or expired
+            console.error('❌ Token verification returned null');
             return NextResponse.redirect(new URL('/?error=invalid-token', request.url));
         }
 
+        console.log('✅ Token verified for email:', email);
+
         // Find or create user
+        console.log('🔍 Looking up user in database...');
         let user = await prisma.participant.findUnique({
             where: { email },
         });
 
         if (!user) {
+            console.log('📝 Creating new user...');
             user = await prisma.participant.create({
                 data: {
                     email,
@@ -36,6 +42,8 @@ export async function GET(request: NextRequest) {
                 }
             });
         }
+
+        console.log('✅ User found/created:', user.id);
 
         // Set secure session cookie
         const cookieStore = await cookies();
@@ -52,7 +60,11 @@ export async function GET(request: NextRequest) {
         return NextResponse.redirect(new URL('/game', request.url));
 
     } catch (error) {
-        console.error('Verification error:', error);
+        console.error('❌ Verification error:', error);
+        console.error('Error details:', {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : undefined,
+        });
         return NextResponse.redirect(new URL('/?error=verification-failed', request.url));
     }
 }
