@@ -79,6 +79,7 @@ export default function LeaderboardView({ initialData }: { initialData: Leaderbo
                                 <tr className="bg-white/5 border-b border-white/10">
                                     <th className="p-4 text-sm font-medium text-gray-400 w-16 text-center">#</th>
                                     <th className="p-4 text-sm font-medium text-gray-400">Player</th>
+                                    <th className="p-4 text-sm font-medium text-gray-400 text-right">Bingo Lines</th>
                                     <th className="p-4 text-sm font-medium text-gray-400 text-right">Progress</th>
                                     <th className="p-4 text-sm font-medium text-gray-400 text-right w-24">Status</th>
                                 </tr>
@@ -86,7 +87,7 @@ export default function LeaderboardView({ initialData }: { initialData: Leaderbo
                             <tbody className="divide-y divide-white/5">
                                 {entries.length === 0 ? (
                                     <tr>
-                                        <td colSpan={4} className="p-8 text-center text-gray-500">
+                                        <td colSpan={5} className="p-8 text-center text-gray-500">
                                             No players yet.
                                             {sessionCode && " Waiting for participants..."}
                                         </td>
@@ -102,6 +103,11 @@ export default function LeaderboardView({ initialData }: { initialData: Leaderbo
                                             </td>
                                             <td className={cn("p-4 font-medium text-gray-200", isPresenter && "text-xl")}>
                                                 {entry.name}
+                                            </td>
+                                            <td className="p-4 text-right">
+                                                <span className="inline-flex items-center gap-1 text-yellow-400 text-lg font-bold">
+                                                    {entry.bingoLines} 🎯
+                                                </span>
                                             </td>
                                             <td className="p-4 text-right font-mono text-blue-300">
                                                 {entry.score} / 20
