@@ -1,102 +1,134 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { getSession } from './auth';
-import { GAME_COMPONENTS } from '@/lib/game-config';
+import { checkBingoLines } from '@/lib/bingo';
 import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
 
-export async function getGameState() {
-    const userId = await getSession();
-
-    if (!userId) {
-        return { error: 'Unauthorized' };
-    }
-
-    const participant = await prisma.participant.findUnique({
-        where: { id: userId },
-    });
-
-    if (!participant) {
-        return { error: 'User not found' };
-    }
-
-    return {
-        participant,
-        config: GAME_COMPONENTS,
-    };
-}
-
-export async function completeComponent(componentId: string) {
-    const userId = await getSession();
-    if (!userId) return { error: 'Unauthorized' };
-
+/**
+ * Mark a component as complete for the current participant
+ * Calculates bingo lines and updates score
+ */
+export async function markComponentComplete(componentId: string) {
     try {
-        const participant = await prisma.participant.findUnique({
-            where: { id: userId },
-        });
+        const cookieStore = await cookies();
+        const sessionCookie = cookieStore.get('ai_bingo_session');
 
-        if (!participant) return { error: 'User not found' };
-
-        // Check if component exists
-        const component = GAME_COMPONENTS.find(c => c.id === componentId);
-        if (!component) return { error: 'Invalid component' };
-
-        // Check if already unlocked
-        const currentIds = participant.unlockedComponentIds ? participant.unlockedComponentIds.split(',').filter(Boolean) : [];
-
-        if (currentIds.includes(componentId)) {
-            return { success: true, alreadyUnlocked: true };
+        if (!sessionCookie) {
+            return { success: false, error: 'Not logged in' };
         }
 
-        const newUnlocked = [...currentIds, componentId];
-
-        // Check for Bingo / Completion
-        // Requirements say "complete stack" for the game end?
-        // "This is will continue till they learn the complete stack."
-        // So isCompleted = all 20 components?
-        const isCompleted = newUnlocked.length === GAME_COMPONENTS.length;
-
-        await prisma.participant.update({
-            where: { id: userId },
-            data: {
-                unlockedComponentIds: newUnlocked.join(','),
-                isCompleted,
-            }
+        const participant = await prisma.participant.findUnique({
+            where: { id: sessionCookie.value },
+            include: { session: true },
         });
 
-        // Revalidate the game path so the UI updates
-        revalidatePath('/game');
+        if (!participant) {
+            return { success: false, error: 'Participant not found' };
+        }
 
-        return { success: true, isCompleted };
+        // Get current completed components
+        const completed = participant.completedComponents
+            ? participant.completedComponents.split(',')
+            : [];
 
-    } catch (error) {
-        console.error('Completion error:', error);
-        return { error: 'Failed to update progress' };
-    }
+        // Add new component if not already completed
+        if (!completed.includes(componentId)) {
+            completed.push(componentId);
+        }
 
-}
+        // Get card layout
+        const cardLayout = participant.cardLayout
+            ? participant.cardLayout.split(',')
+            : [];
 
-export async function joinSession(sessionCode: string) {
-    const userId = await getSession();
-    if (!userId) return { error: 'Unauthorized' };
+        // Calculate bingo lines
+        const bingoLines = checkBingoLines(cardLayout, completed);
 
-    if (!sessionCode || sessionCode.trim().length === 0) {
-        return { error: 'Invalid Code' };
-    }
-
-    try {
+        // Update participant
         await prisma.participant.update({
-            where: { id: userId },
+            where: { id: participant.id },
             data: {
-                // We repurpose 'passcode' as 'sessionCode' to avoid schema migration
-                passcode: sessionCode.trim().toUpperCase(),
-            }
+                completedComponents: completed.join(','),
+                bingoLines,
+                isCompleted: completed.length === 20, // Full card complete
+            },
         });
 
         revalidatePath('/game');
         revalidatePath('/leaderboard');
-        return { success: true };
+
+        return {
+            success: true,
+            bingoLines,
+            completedCount: completed.length,
+            isFullCard: completed.length === 20,
+        };
     } catch (error) {
-        return { error: 'Failed to join session' };
+        console.error('Failed to mark component complete:', error);
+        return { success: false, error: 'Failed to update progress' };
+    }
+}
+
+/**
+ * Get game state for the current participant
+ */
+export async function getGameState() {
+    try {
+        const cookieStore = await cookies();
+        const sessionCookie = cookieStore.get('ai_bingo_session');
+
+        if (!sessionCookie) {
+            return { error: 'Not logged in' };
+        }
+
+        const participant = await prisma.participant.findUnique({
+            where: { id: sessionCookie.value },
+            include: { session: true },
+        });
+
+        if (!participant) {
+            return { error: 'Participant not found' };
+        }
+
+        // Get unlocked components from session
+        const unlockedComponents = participant.session?.unlockedComponents
+            ? participant.session.unlockedComponents.split(',')
+            : [];
+
+        // Get card layout
+        const cardLayout = participant.cardLayout
+            ? participant.cardLayout.split(',')
+            : [];
+
+        // Get completed components
+        const completedComponents = participant.completedComponents
+            ? participant.completedComponents.split(',')
+            : [];
+
+        return {
+            participant: {
+                id: participant.id,
+                name: participant.name || participant.email.split('@')[0],
+                email: participant.email,
+                passcode: participant.passcode,
+                cardLayout,
+                completedComponents,
+                bingoLines: participant.bingoLines,
+                isCompleted: participant.isCompleted,
+            },
+            session: participant.session ? {
+                id: participant.session.id,
+                code: participant.session.code,
+                unlockedComponents,
+            } : null,
+            config: {
+                // This will be used by BingoGrid to render the components
+                totalComponents: 20,
+            },
+        };
+    } catch (error) {
+        console.error('Failed to get game state:', error);
+        return { error: 'Failed to load game state' };
     }
 }
