@@ -1,25 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
+import { verifyMagicLinkToken } from '@/lib/token';
+
+const COOKIE_NAME = 'ai_bingo_session';
 
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const token = searchParams.get('token');
 
     if (!token) {
-        return NextResponse.redirect(new URL('/?error=Missing Token', request.url));
+        return NextResponse.redirect(new URL('/?error=missing-token', request.url));
     }
 
     try {
-        // Simple Base64 decoding (Stateless for demo)
-        // In prod, verify a JWT or separate DB token!
-        const email = Buffer.from(token, 'base64').toString('utf-8');
+        // Verify JWT token
+        const email = verifyMagicLinkToken(token);
 
-        if (!email.includes('@')) {
-            return NextResponse.redirect(new URL('/?error=Invalid Token', request.url));
+        if (!email) {
+            // Token is invalid or expired
+            return NextResponse.redirect(new URL('/?error=invalid-token', request.url));
         }
 
-        // Find or Create User
+        // Find or create user
         let user = await prisma.participant.findUnique({
             where: { email },
         });
@@ -28,25 +31,28 @@ export async function GET(request: NextRequest) {
             user = await prisma.participant.create({
                 data: {
                     email,
-                    passcode: 'magic-link-user', // Dummy passcode
+                    passcode: 'magic-link-user', // Default session code
                     name: email.split('@')[0],
                 }
             });
         }
 
-        // Set Session
+        // Set secure session cookie
         const cookieStore = await cookies();
-        cookieStore.set('ai_bingo_session', user.id, {
+        cookieStore.set(COOKIE_NAME, user.id, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
             path: '/',
-            maxAge: 60 * 60 * 4,
+            maxAge: 60 * 60 * 24 * 7, // 7 days
         });
+
+        console.log('✅ User authenticated:', email);
 
         return NextResponse.redirect(new URL('/game', request.url));
 
     } catch (error) {
-        console.error("Link verification failed:", error);
-        return NextResponse.redirect(new URL('/?error=Verification Failed', request.url));
+        console.error('Verification error:', error);
+        return NextResponse.redirect(new URL('/?error=verification-failed', request.url));
     }
 }
