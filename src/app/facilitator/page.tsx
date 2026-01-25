@@ -25,11 +25,29 @@ interface SessionState {
 
 export default function FacilitatorPage() {
     const [sessionState, setSessionState] = useState<SessionState | null>(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     // All components in pedagogical order (flat array)
     const allComponents = GAME_COMPONENTS;
+
+    // Load session from localStorage on mount
+    useEffect(() => {
+        const loadSession = async () => {
+            const savedSessionId = localStorage.getItem('facilitator_session_id');
+            if (savedSessionId) {
+                const state = await getSessionState(savedSessionId);
+                if ('session' in state) {
+                    setSessionState(state as SessionState);
+                } else {
+                    // Session not found, clear localStorage
+                    localStorage.removeItem('facilitator_session_id');
+                }
+            }
+            setLoading(false);
+        };
+        loadSession();
+    }, []);
 
     const handleCreateSession = async () => {
         setLoading(true);
@@ -41,6 +59,9 @@ export default function FacilitatorPage() {
         const result = await createSession(facilitatorEmail);
 
         if (result.success && result.session) {
+            // Save session ID to localStorage
+            localStorage.setItem('facilitator_session_id', result.session.id);
+
             // Load session state
             const state = await getSessionState(result.session.id);
             if ('session' in state) {
@@ -70,6 +91,11 @@ export default function FacilitatorPage() {
         }
 
         setLoading(false);
+    };
+
+    const handleEndSession = () => {
+        localStorage.removeItem('facilitator_session_id');
+        setSessionState(null);
     };
 
     // Poll for updates every 5 seconds
@@ -127,13 +153,21 @@ export default function FacilitatorPage() {
                         <h1 className="text-4xl font-bold">Facilitator Dashboard</h1>
                         <p className="text-gray-400 mt-2">Control the learning flow for your session</p>
                     </div>
-                    <Link
-                        href="/leaderboard"
-                        className="flex items-center gap-2 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 px-4 py-2 rounded-lg transition-colors"
-                    >
-                        <Trophy className="w-5 h-5" />
-                        View Leaderboard
-                    </Link>
+                    <div className="flex items-center gap-3">
+                        <Link
+                            href="/leaderboard"
+                            className="flex items-center gap-2 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 px-4 py-2 rounded-lg transition-colors"
+                        >
+                            <Trophy className="w-5 h-5" />
+                            View Leaderboard
+                        </Link>
+                        <button
+                            onClick={handleEndSession}
+                            className="flex items-center gap-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 px-4 py-2 rounded-lg transition-colors"
+                        >
+                            End Session
+                        </button>
+                    </div>
                 </div>
 
                 {/* Session Info */}
