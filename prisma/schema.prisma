@@ -8,16 +8,38 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
+model Session {
+  id                  String   @id @default(cuid())
+  code                String   @unique // e.g., "1YY1LV"
+  facilitatorEmail    String
+  unlockedComponents  String   @default("") // Comma-separated component IDs
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  participants        Participant[]
+}
+
 model Participant {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  passcode  String
-  name      String?
+  id                    String   @id @default(cuid())
+  email                 String   @unique
+  passcode              String   // Legacy field, can be session code
+  name                  String?
   
-  // Storing unlocked component IDs as a simple string (comma separated) for SQLite support
-  unlockedComponentIds String @default("")
+  // Session relationship
+  sessionId             String?
+  session               Session? @relation(fields: [sessionId], references: [id])
   
-  isCompleted Boolean  @default(false)
-  joinedAt    DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  // Card randomization - stores the order of component IDs for this player's card
+  cardLayout            String   @default("") // Comma-separated component IDs in random order
+  
+  // Progress tracking
+  completedComponents   String   @default("") // Comma-separated IDs of tiles marked complete
+  bingoLines            Int      @default(0)  // Number of bingo lines completed
+  
+  // Legacy field (keeping for backward compatibility)
+  unlockedComponentIds  String   @default("")
+  isCompleted           Boolean  @default(false)
+  
+  joinedAt              DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 }
