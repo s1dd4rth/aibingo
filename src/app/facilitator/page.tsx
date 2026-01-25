@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createSession, getSessionState, unlockNextComponent } from '@/actions/session';
-import { GAME_COMPONENTS } from '@/config/game-config';
+import { GAME_COMPONENTS } from '@/lib/game-config';
 import { Trophy, Users, Unlock, CheckCircle2, Lock } from 'lucide-react';
 import Link from 'next/link';
 
@@ -198,8 +198,8 @@ export default function FacilitatorPage() {
                                 <div
                                     key={component.id}
                                     className={`flex items-center gap-3 p-3 rounded-lg ${isUnlocked
-                                            ? 'bg-green-500/10 border border-green-500/20'
-                                            : 'bg-white/5 border border-white/10'
+                                        ? 'bg-green-500/10 border border-green-500/20'
+                                        : 'bg-white/5 border border-white/10'
                                         }`}
                                 >
                                     {isUnlocked ? (
