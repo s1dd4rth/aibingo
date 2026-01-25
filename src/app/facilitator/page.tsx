@@ -28,13 +28,8 @@ export default function FacilitatorPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // All components in pedagogical order
-    const allComponents = [
-        ...GAME_COMPONENTS.basics,
-        ...GAME_COMPONENTS.combos,
-        ...GAME_COMPONENTS.production,
-        ...GAME_COMPONENTS.future,
-    ];
+    // All components in pedagogical order (flat array)
+    const allComponents = GAME_COMPONENTS;  ];
 
     const handleCreateSession = async () => {
         setLoading(true);
