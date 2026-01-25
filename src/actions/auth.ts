@@ -54,8 +54,8 @@ export async function sendMagicLink(formData: z.infer<typeof LoginSchema>) {
         // Generate secure JWT token
         const token = generateMagicLinkToken(email);
 
-        // Build verification link
-        const origin = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        // Build verification link (remove trailing slash from origin if present)
+        const origin = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '');
         const link = `${origin}/verify?token=${token}`;
 
         // Send email using the mail utility
