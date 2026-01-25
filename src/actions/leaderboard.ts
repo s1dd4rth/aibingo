@@ -7,6 +7,7 @@ export interface LeaderboardEntry {
     rank: number;
     name: string;
     score: number;
+    bingoLines: number;
     isCompleted: boolean;
 }
 
@@ -24,11 +25,18 @@ export async function getLeaderboard(): Promise<LeaderboardData> {
     if (currentUserId) {
         const user = await prisma.participant.findUnique({
             where: { id: currentUserId },
-            select: { passcode: true }
+            select: { passcode: true, sessionId: true }
         });
 
-        // Treat 'magic-link-user' as no session
-        if (user?.passcode && user.passcode !== 'magic-link-user') {
+        // Use sessionId if available, otherwise fall back to passcode
+        if (user?.sessionId) {
+            sessionFilter = { sessionId: user.sessionId };
+            const session = await prisma.session.findUnique({
+                where: { id: user.sessionId },
+                select: { code: true }
+            });
+            currentSessionCode = session?.code || null;
+        } else if (user?.passcode && user.passcode !== 'magic-link-user') {
             sessionFilter = { passcode: user.passcode };
             currentSessionCode = user.passcode;
         }
@@ -40,27 +48,39 @@ export async function getLeaderboard(): Promise<LeaderboardData> {
         select: {
             email: true,
             name: true,
-            unlockedComponentIds: true,
+            completedComponents: true,
+            bingoLines: true,
             isCompleted: true
         },
-        orderBy: { isCompleted: 'desc' },
+        orderBy: [
+            { bingoLines: 'desc' },
+            { isCompleted: 'desc' }
+        ],
         take: 100
     });
 
     // 3. Compute scores
     const leaderboard = users.map(user => {
-        const ids = user.unlockedComponentIds ? user.unlockedComponentIds.split(',').filter(Boolean) : [];
+        const completed = user.completedComponents
+            ? user.completedComponents.split(',').filter(Boolean)
+            : [];
         return {
             rawName: user.name || user.email,
-            score: ids.length,
+            score: completed.length,
+            bingoLines: user.bingoLines,
             isCompleted: user.isCompleted
         };
     });
 
-    // 4. Sort
-    leaderboard.sort((a, b) => b.score - a.score);
+    // 4. Sort by bingo lines first, then by score
+    leaderboard.sort((a, b) => {
+        if (b.bingoLines !== a.bingoLines) {
+            return b.bingoLines - a.bingoLines;
+        }
+        return b.score - a.score;
+    });
 
-    // 5. Mask
+    // 5. Mask emails
     const entries = leaderboard.map((entry, index) => {
         let displayName = entry.rawName;
         if (displayName.includes('@')) {
@@ -76,6 +96,7 @@ export async function getLeaderboard(): Promise<LeaderboardData> {
             rank: index + 1,
             name: displayName,
             score: entry.score,
+            bingoLines: entry.bingoLines,
             isCompleted: entry.isCompleted
         };
     });
