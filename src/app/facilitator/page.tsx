@@ -29,7 +29,7 @@ export default function FacilitatorPage() {
     const [error, setError] = useState<string | null>(null);
 
     // All components in pedagogical order (flat array)
-    const allComponents = GAME_COMPONENTS;  ];
+    const allComponents = GAME_COMPONENTS;
 
     const handleCreateSession = async () => {
         setLoading(true);
@@ -170,8 +170,8 @@ export default function FacilitatorPage() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <div className="text-sm text-purple-400 mb-1">Next Component</div>
-                                    <div className="text-xl font-bold">{nextToUnlock.title}</div>
-                                    <div className="text-sm text-gray-400 mt-1">{nextToUnlock.category}</div>
+                                    <div className="text-xl font-bold">{nextToUnlock.name}</div>
+                                    <div className="text-sm text-gray-400 mt-1">{nextToUnlock.period}</div>
                                 </div>
                                 <button
                                     onClick={() => handleUnlockNext(nextToUnlock.id)}
@@ -203,8 +203,8 @@ export default function FacilitatorPage() {
                                         <Lock className="w-5 h-5 text-gray-600 flex-shrink-0" />
                                     )}
                                     <div className="flex-1">
-                                        <div className="font-medium">{component.title}</div>
-                                        <div className="text-sm text-gray-400">{component.category}</div>
+                                        <div className="font-medium">{component.name}</div>
+                                        <div className="text-sm text-gray-400">{component.period}</div>
                                     </div>
                                 </div>
                             );
