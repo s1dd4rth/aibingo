@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Bingo Quest 🤖🎯
+
+A gamified AI learning platform built with **Next.js 15**, **Prisma**, and **Google Gemini 2.0**.
+Participants unlock stamps by running Python snippets in Colab, learning the full AI stack from "Asking" to "Thinking" and "Agents".
+
+## Features
+- **Gamified Learning**: 20 unlockable components representing the modern AI stack.
+- **Magic Link Auth**: Passwordless login using simulated email (dev) or Nodemailer.
+- **Live Leaderboard**: Real-time ranking with Presenter Mode for workshops.
+- **Multiplayer Sessions**: Join rooms with custom codes (e.g. `WORKSHOP-1`).
+- **AI Integration**:
+  - Gemini 2.0 Flash for core logic.
+  - Gemini 3.0 Flash Preview for **Native Thinking** (System 2 reasoning).
+  - Multimodal capabilities (Audio/Video understanding).
+
+## Tech Stack
+- **Framework**: Next.js 15 (App Router, Server Actions)
+- **Database**: SQLite (Dev) / Postgres (Prod) via Prisma
+- **Styling**: TailwindCSS 4 + Framer Motion
+- **AI**: Google Gemini API (`google-genai` SDK)
 
 ## Getting Started
 
-First, run the development server:
-
+### 1. Clone & Install
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/s1dd4rth/aibingo.git
+cd aibingo
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Environment Setup
+Create a `.env` file:
+```env
+DATABASE_URL="file:./dev.db"
+GEMINI_API_KEY="your_google_ai_studio_key"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Run Locally
+```bash
+npx prisma db push  # Setup SQLite DB
+npm run dev         # Start Server
+```
+Visit `http://localhost:3000`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Deployment (Vercel)
+1.  Push to GitHub.
+2.  Import in Vercel.
+3.  Set Environment Variables (`GEMINI_API_KEY`, `POSTGRES_PRISMA_URL`...).
+4.  **Important**: Update `prisma/schema.prisma` to use `provider = "postgresql"` for production.
 
-## Learn More
+## Workshop Mode (Facilitator)
+1.  Go to `/leaderboard`.
+2.  Click **Present**.
+3.  Share the **Session Code** shown on screen.
+4.  Participants join via the "Live Workshop" box on the home screen.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+MIT

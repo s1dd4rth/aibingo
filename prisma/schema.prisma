@@ -1,0 +1,22 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Participant {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  passcode  String
+  name      String?
+  
+  // Storing unlocked component IDs as a simple string (comma separated) for SQLite support
+  unlockedComponentIds String @default("")
+  
+  isCompleted Boolean  @default(false)
+  joinedAt    DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

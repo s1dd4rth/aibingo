@@ -1,0 +1,7 @@
+components:
+  status-handling:
+    description: "Standard for handling locked/unlocked/completed status props in components."
+  copy-to-clipboard:
+    description: "Standard for copy‑to‑clipboard button pattern and state management."
+  modal-drawer:
+    description: "Standard modal/drawer implementation using AnimatePresence and motion."
