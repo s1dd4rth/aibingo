@@ -17,11 +17,16 @@ export default async function GamePage() {
             <div className="text-center space-y-2">
                 <h1 className="text-4xl md:text-5xl font-bold text-white">Your Learning Path</h1>
                 <p className="text-gray-400 max-w-2xl mx-auto">
-                    Complete modules to unlock stamps. Fill the grid to master the full AI stack.
+                    {state.session
+                        ? "Complete components as they're unlocked by your facilitator"
+                        : "Join a session to start learning with a facilitator"}
                 </p>
             </div>
 
-            <SessionJoin currentSession={state.participant.passcode} />
+            <SessionJoin
+                currentSession={state.session?.code || state.participant.passcode}
+                participantId={state.participant.id}
+            />
             <ColabSetup />
 
             <BingoGrid
