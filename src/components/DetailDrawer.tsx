@@ -2,19 +2,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, ExternalLink, CheckCircle, Loader2, Lightbulb, BookOpen, Wrench, Copy, Check } from 'lucide-react';
 import { GameComponent } from '@/lib/game-config';
 import { useState } from 'react';
-import { completeComponent } from '@/actions/game';
 import { cn } from '@/lib/utils';
 import { useCopy } from '@/lib/useCopy';
 
 interface DetailDrawerProps {
   component: GameComponent | null;
   onClose: () => void;
-  onComplete: (componentId: string) => void;
+  onComplete: () => void;
   status: 'locked' | 'unlocked' | 'completed';
+  isCompleting?: boolean;
 }
 
-export default function DetailDrawer({ component, onClose, onComplete, status }: DetailDrawerProps) {
-  const [isCompleting, setIsCompleting] = useState(false);
+export default function DetailDrawer({ component, onClose, onComplete, status, isCompleting = false }: DetailDrawerProps) {
   const [activeTab, setActiveTab] = useState(0);
   const { copied, copy } = useCopy();
   const isCompleted = status === 'completed';
@@ -26,18 +25,9 @@ export default function DetailDrawer({ component, onClose, onComplete, status }:
 
   if (!component) return null;
 
-  const handleAction = async () => {
-    if (isCompleted) return;
-
-    setIsCompleting(true);
-
-    const res = await completeComponent(component.id);
-    setIsCompleting(false);
-
-    if (res?.success) {
-      onComplete(component.id);
-      onClose();
-    }
+  const handleAction = () => {
+    if (isCompleted || status === 'locked') return;
+    onComplete();
   };
 
   return (
@@ -139,7 +129,7 @@ export default function DetailDrawer({ component, onClose, onComplete, status }:
                   )}
 
                   <button
-                    onClick={() => copy(component.examples ? component.examples[activeTab].code : component.codeSnippet!) }
+                    onClick={() => copy(component.examples ? component.examples[activeTab].code : component.codeSnippet!)}
                     className="mr-2 text-xs flex items-center gap-1.5 text-gray-400 hover:text-white transition-colors"
                   >
                     {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
