@@ -162,17 +162,19 @@ export default function DetailDrawer({ component, onClose, onComplete, status, i
               <h4 className="flex items-center gap-2 font-semibold text-blue-300 mb-2">
                 <ExternalLink className="w-4 h-4" /> Learning Resource
               </h4>
-              {component.colabUrl ? (
+              {component.docUrl ? (
                 <a
-                  href={component.colabUrl}
+                  href={component.docUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block transition-transform hover:scale-105"
+                  className="inline-flex items-center gap-2 bg-[#4285F4]/10 hover:bg-[#4285F4]/20 text-[#4285F4] px-4 py-2 rounded-lg font-medium transition-colors border border-[#4285F4]/20"
                 >
-                  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab" className="h-8" />
+                  <img src="https://www.gstatic.com/devrel-devsite/prod/v22100755d6d376378546b95d03a1194270275815/developers/images/touchicon-180.png" alt="Google Developers" className="w-5 h-5 rounded-sm" />
+                  View Google Developer Docs
+                  <ExternalLink className="w-4 h-4 ml-1" />
                 </a>
               ) : (
-                <p className="text-sm text-blue-200/80">Follow the workshop guide to learn about {component.name}. content loaded.</p>
+                <p className="text-sm text-blue-200/80">Documentation coming soon for {component.name}.</p>
               )}
             </div>
           </div>
