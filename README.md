@@ -68,6 +68,18 @@ npm test
 npm run test:watch
 ```
 
+## CI/CD and Automation
+
+This project includes a comprehensive test suite that should be run before deployment:
+
+1. **Unit Tests**: Cover utility functions and individual components.
+2. **Integration Tests**: Verify interactions between components and mock server actions.
+
+**To run the full suite:**
+```bash
+npm test
+```
+
 ## Security Standards
 
 This project implements standard security practices:
