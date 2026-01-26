@@ -105,6 +105,7 @@ export default function BingoGrid({ participant, session }: BingoGridProps) {
                             status={status}
                             onClick={() => setSelectedComponentId(componentId)}
                             index={index}
+                            aria-label={`Bingo card for ${component.name}, status: ${status}`}
                         />
                     );
                 })}

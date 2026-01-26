@@ -55,5 +55,34 @@ Visit `http://localhost:3000`.
 3.  Share the **Session Code** shown on screen.
 4.  Participants join via the "Live Workshop" box on the home screen.
 
+
+## Testing
+
+We use Jest and React Testing Library for unit and integration testing.
+
+```bash
+# Run tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+```
+
+## Security Standards
+
+This project implements standard security practices:
+- **Headers**: Strict Content-Security-Policy, HSTS, X-Frame-Options configured in `next.config.ts`.
+- **Authentication**: Secure Magic Link implementation with JWT.
+- **CSRF Protection**: Standard protection via Next.js Server Actions and framework features.
+
+## Accessibility Guidelines
+
+We follow WCAG 2.1 AA standards. Key practices include:
+- **Semantic HTML**: Proper use of standard elements.
+- **ARIA Attributes**: Used where semantic HTML is insufficient (e.g., dynamic states in Bingo cards).
+- **Keyboard Navigation**: Ensure all interactive elements are reachable via keyboard.
+- **Color Contrast**: sufficient contrast ratios for text and UI elements.
+
 ## License
 MIT
+

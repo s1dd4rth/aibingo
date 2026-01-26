@@ -10,9 +10,10 @@ interface BingoCardProps {
   status: 'locked' | 'unlocked' | 'completed';
   onClick: () => void;
   index: number;
+  [key: string]: any; // Allow other props like aria-label
 }
 
-export default function BingoCard({ component, status, onClick, index }: BingoCardProps) {
+export default function BingoCard({ component, status, onClick, index, ...props }: BingoCardProps) {
   const isLocked = status === 'locked';
   const isCompleted = status === 'completed';
 
@@ -31,6 +32,7 @@ export default function BingoCard({ component, status, onClick, index }: BingoCa
           : "bg-white/10 border border-white/10 hover:bg-white/15 hover:border-white/20 hover:scale-[1.02] cursor-pointer",
         isCompleted && "bg-green-500/10 border-green-500/30"
       )}
+      {...props}
     >
       {/* Background Gradient for completed */}
       {isCompleted && (
