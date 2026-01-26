@@ -11,6 +11,7 @@ const customJestConfig = {
     testEnvironment: 'jest-environment-jsdom',
     moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1',
+        '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
     },
 }
 
