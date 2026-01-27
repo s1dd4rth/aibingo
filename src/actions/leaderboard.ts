@@ -18,28 +18,47 @@ export interface LeaderboardData {
 
 export async function getLeaderboard(): Promise<LeaderboardData> {
     const currentUserId = await getSession();
-    let sessionFilter = {};
+    // Default to empty filter that matches nothing if no session found
+    let sessionFilter: any = { id: 'no-match' };
     let currentSessionCode: string | null = null;
+    let hasAccess = false;
 
-    // 1. Determine Session Context
     if (currentUserId) {
         const user = await prisma.participant.findUnique({
             where: { id: currentUserId },
-            select: { passcode: true, sessionId: true }
+            select: { email: true, passcode: true, sessionId: true }
         });
 
-        // Use sessionId if available, otherwise fall back to passcode
-        if (user?.sessionId) {
-            sessionFilter = { sessionId: user.sessionId };
-            const session = await prisma.session.findUnique({
-                where: { id: user.sessionId },
-                select: { code: true }
-            });
-            currentSessionCode = session?.code || null;
-        } else if (user?.passcode && user.passcode !== 'magic-link-user') {
-            sessionFilter = { passcode: user.passcode };
-            currentSessionCode = user.passcode;
+        if (user) {
+            // 1. Check if user is a participant in a session
+            if (user.sessionId) {
+                sessionFilter = { sessionId: user.sessionId };
+                const session = await prisma.session.findUnique({
+                    where: { id: user.sessionId },
+                    select: { code: true }
+                });
+                currentSessionCode = session?.code || null;
+                hasAccess = true;
+            }
+            // 2. Check if user is a facilitator (owner of a session)
+            else {
+                const facilitatorSession = await prisma.session.findFirst({
+                    where: { facilitatorEmail: user.email },
+                    orderBy: { createdAt: 'desc' },
+                    select: { id: true, code: true }
+                });
+
+                if (facilitatorSession) {
+                    sessionFilter = { sessionId: facilitatorSession.id };
+                    currentSessionCode = facilitatorSession.code;
+                    hasAccess = true;
+                }
+            }
         }
+    }
+
+    if (!hasAccess) {
+        return { entries: [], sessionCode: null };
     }
 
     // 2. Fetch Users
@@ -83,6 +102,8 @@ export async function getLeaderboard(): Promise<LeaderboardData> {
     // 5. Mask emails
     const entries = leaderboard.map((entry, index) => {
         let displayName = entry.rawName;
+        // Don't mask if it looks like a real name (no @)
+        // If it is an email, mask it
         if (displayName.includes('@')) {
             const [local, domain] = displayName.split('@');
             if (local.length > 2) {

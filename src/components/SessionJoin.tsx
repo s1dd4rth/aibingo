@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { joinSession } from '@/actions/session';
+import { joinSession, leaveSession } from '@/actions/session';
 import { Users, LogIn } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -10,6 +10,7 @@ export default function SessionJoin({ currentSession, participantId }: { current
     const [code, setCode] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isDisconnecting, setIsDisconnecting] = useState(false);
     const router = useRouter();
 
     // If "magic-link-user" is the default dummy pass, show as None/Global
@@ -30,6 +31,23 @@ export default function SessionJoin({ currentSession, participantId }: { current
         }
 
         setIsLoading(false);
+    }
+
+    async function handleDisconnect() {
+        if (!confirm('Are you sure you want to disconnect? Your bingo progress will be reset.')) return;
+
+        setIsDisconnecting(true);
+        setError(null);
+
+        const result = await leaveSession();
+
+        if (result.success) {
+            router.refresh();
+        } else {
+            setError(result.error || 'Failed to disconnect');
+        }
+
+        setIsDisconnecting(false);
     }
 
     return (
@@ -89,6 +107,13 @@ export default function SessionJoin({ currentSession, participantId }: { current
                         <div className="bg-green-500/10 border border-green-500 text-green-500 px-4 py-2 text-xs font-mono uppercase">
                             ● LINK_ESTABLISHED
                         </div>
+                        <button
+                            onClick={handleDisconnect}
+                            disabled={isDisconnecting}
+                            className="text-xs text-destructive hover:text-destructive/80 font-mono uppercase border border-destructive/50 px-3 py-2 hover:bg-destructive/10 transition-colors"
+                        >
+                            {isDisconnecting ? 'DISCONNECTING...' : 'DISCONNECT_LINK'}
+                        </button>
                     </div>
                     <Link
                         href="/leaderboard"

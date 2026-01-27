@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createSession, getSessionState, unlockNextComponent } from '@/actions/session';
+import { createSession, unlockNextComponent, getFacilitatorSession, deleteSession } from '@/actions/session';
 import { GAME_COMPONENTS } from '@/lib/game-config';
 import { Trophy, Users, Unlock, CheckCircle2, Lock } from 'lucide-react';
 import Link from 'next/link';
@@ -28,21 +28,20 @@ export default function FacilitatorPage() {
     const [sessionState, setSessionState] = useState<SessionState | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [showTerminationConfirm, setShowTerminationConfirm] = useState(false);
 
     // All components in pedagogical order (flat array)
     const allComponents = GAME_COMPONENTS;
 
-    // Load session from localStorage on mount
+    // Load session from server on mount
     useEffect(() => {
         const loadSession = async () => {
-            const savedSessionId = localStorage.getItem('facilitator_session_id');
-            if (savedSessionId) {
-                const state = await getSessionState(savedSessionId);
-                if ('session' in state) {
-                    setSessionState(state as SessionState);
-                } else {
-                    // Session not found, clear localStorage
-                    localStorage.removeItem('facilitator_session_id');
+            const result = await getFacilitatorSession();
+            if ('session' in result) {
+                setSessionState(result as SessionState);
+            } else if (result.error !== 'No active session found') {
+                if (result.error !== 'Not authenticated' && result.error !== 'User not found') {
+                    // console.error(result.error);
                 }
             }
             setLoading(false);
@@ -54,17 +53,11 @@ export default function FacilitatorPage() {
         setLoading(true);
         setError(null);
 
-        // Get current user email (you'll need to pass this from auth)
-        const facilitatorEmail = 'facilitator@example.com'; // TODO: Get from auth
-
-        const result = await createSession(facilitatorEmail);
+        const result = await createSession();
 
         if (result.success && result.session) {
-            // Save session ID to localStorage
-            localStorage.setItem('facilitator_session_id', result.session.id);
-
-            // Load session state
-            const state = await getSessionState(result.session.id);
+            // Refresh to get full state
+            const state = await getFacilitatorSession();
             if ('session' in state) {
                 setSessionState(state as SessionState);
             }
@@ -83,7 +76,7 @@ export default function FacilitatorPage() {
 
         if (result.success) {
             // Refresh session state
-            const state = await getSessionState(sessionState.session.id);
+            const state = await getFacilitatorSession();
             if ('session' in state) {
                 setSessionState(state as SessionState);
             }
@@ -94,9 +87,24 @@ export default function FacilitatorPage() {
         setLoading(false);
     };
 
-    const handleEndSession = () => {
-        localStorage.removeItem('facilitator_session_id');
-        setSessionState(null);
+    const handleEndSession = async (confirmed: boolean) => {
+        if (!confirmed) {
+            setShowTerminationConfirm(false);
+            return;
+        }
+
+        if (!sessionState) return;
+
+        setLoading(true);
+        const result = await deleteSession(sessionState.session.id);
+
+        if (result.success) {
+            setShowTerminationConfirm(false);
+            setSessionState(null);
+        } else {
+            setError(result.error || 'Failed to delete session');
+        }
+        setLoading(false);
     };
 
     // Poll for updates every 5 seconds
@@ -104,7 +112,7 @@ export default function FacilitatorPage() {
         if (!sessionState) return;
 
         const interval = setInterval(async () => {
-            const state = await getSessionState(sessionState.session.id);
+            const state = await getFacilitatorSession();
             if ('session' in state) {
                 setSessionState(state as SessionState);
             }
@@ -112,6 +120,19 @@ export default function FacilitatorPage() {
 
         return () => clearInterval(interval);
     }, [sessionState]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-background text-foreground p-8 font-sans flex items-center justify-center">
+                <div className="text-center space-y-4">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+                    <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest animate-pulse">
+                        INITIALIZING_SYSTEM_LINK...
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     if (!sessionState) {
         return (
@@ -138,8 +159,12 @@ export default function FacilitatorPage() {
                         disabled={loading}
                         className="w-full schematic-btn py-4 text-lg"
                     >
-                        {loading ? 'INITIALIZING...' : 'CREATE_NEW_SESSION'}
+                        CREATE_NEW_SESSION
                     </button>
+
+                    <p className="text-xs text-muted-foreground font-mono mt-8">
+                        * Authorized Personnel Only. Session will be linked to your ID.
+                    </p>
                 </div>
             </div>
         );
@@ -149,7 +174,7 @@ export default function FacilitatorPage() {
     const nextToUnlock = allComponents.find(c => !unlockedSet.has(c.id));
 
     return (
-        <div className="min-h-screen bg-background text-foreground p-8 font-sans">
+        <div className="min-h-screen bg-background text-foreground p-8 font-sans relative">
             <div className="max-w-6xl mx-auto space-y-8">
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-border pb-8">
@@ -166,7 +191,7 @@ export default function FacilitatorPage() {
                             Leaderboard
                         </Link>
                         <button
-                            onClick={handleEndSession}
+                            onClick={() => setShowTerminationConfirm(true)}
                             className="flex items-center gap-2 bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive px-4 py-2 uppercase font-bold text-xs"
                         >
                             TERMINATE_SESSION
@@ -294,6 +319,36 @@ export default function FacilitatorPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Termination Confirmation Modal */}
+            {showTerminationConfirm && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="schematic-card bg-card p-6 max-w-md w-full border-destructive shadow-[8px_8px_0px_0px_rgba(239,68,68,0.5)]">
+                        <h3 className="text-xl font-bold text-destructive uppercase tracking-tight mb-2">
+                            ⚠️ Confirm_Termination
+                        </h3>
+                        <p className="text-muted-foreground font-mono mb-6">
+                            Are you sure you want to terminate this session? Users will be disconnected immediately and all progress data will be archived.
+                        </p>
+                        <div className="flex gap-4">
+                            <button
+                                onClick={() => handleEndSession(true)}
+                                disabled={loading}
+                                className="flex-1 bg-destructive text-destructive-foreground font-bold uppercase py-3 border border-destructive hover:bg-destructive/90 transition-colors"
+                            >
+                                {loading ? 'Terminating...' : 'YES_TERMINATE'}
+                            </button>
+                            <button
+                                onClick={() => handleEndSession(false)}
+                                disabled={loading}
+                                className="flex-1 bg-background text-foreground font-bold uppercase py-3 border border-border hover:border-primary transition-colors"
+                            >
+                                CANCEL_ACTION
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

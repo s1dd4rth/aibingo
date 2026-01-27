@@ -8,8 +8,34 @@ import { revalidatePath } from 'next/cache';
 /**
  * Create a new session (facilitator only)
  */
-export async function createSession(facilitatorEmail: string) {
+export async function createSession() {
     try {
+        const cookieStore = await cookies();
+        const sessionCookie = cookieStore.get('ai_bingo_session');
+
+        if (!sessionCookie) {
+            return { success: false, error: 'Not authenticated' };
+        }
+
+        const participant = await prisma.participant.findUnique({
+            where: { id: sessionCookie.value },
+        });
+
+        if (!participant) {
+            return { success: false, error: 'User not found' };
+        }
+
+        const facilitatorEmail = participant.email;
+
+        // Check for existing active session
+        const existingSession = await prisma.session.findFirst({
+            where: { facilitatorEmail },
+        });
+
+        if (existingSession) {
+            return { success: true, session: existingSession, message: 'Existing session resumed' };
+        }
+
         const code = generateSessionCode();
 
         const session = await prisma.session.create({
@@ -20,10 +46,143 @@ export async function createSession(facilitatorEmail: string) {
             },
         });
 
+        revalidatePath('/facilitator');
+
         return { success: true, session };
     } catch (error) {
         console.error('Failed to create session:', error);
         return { success: false, error: 'Failed to create session' };
+    }
+}
+
+/**
+ * Leave the current session (participant)
+ */
+export async function leaveSession() {
+    try {
+        const cookieStore = await cookies();
+        const sessionCookie = cookieStore.get('ai_bingo_session');
+
+        if (!sessionCookie) {
+            return { success: false, error: 'Not authenticated' };
+        }
+
+        await prisma.participant.update({
+            where: { id: sessionCookie.value },
+            data: {
+                sessionId: null,
+                passcode: null,
+                cardLayout: null,
+                completedComponents: '',
+                bingoLines: 0,
+            },
+        });
+
+        revalidatePath('/game');
+        revalidatePath('/leaderboard');
+        return { success: true };
+    } catch (error) {
+        console.error('Failed to leave session:', error);
+        return { success: false, error: 'Failed to leave session' };
+    }
+}
+
+/**
+ * Get the current active session for a facilitator
+ */
+export async function getFacilitatorSession() {
+    try {
+        const cookieStore = await cookies();
+        const sessionCookie = cookieStore.get('ai_bingo_session');
+
+        if (!sessionCookie) {
+            return { error: 'Not authenticated' };
+        }
+
+        const participant = await prisma.participant.findUnique({
+            where: { id: sessionCookie.value },
+        });
+
+        if (!participant) {
+            return { error: 'User not found' };
+        }
+
+        // Find the most recent session created by this facilitator
+        const session = await prisma.session.findFirst({
+            where: { facilitatorEmail: participant.email },
+            orderBy: { createdAt: 'desc' }, // Get the latest one if multiple (though UI should mostly handle one)
+            include: {
+                participants: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        bingoLines: true,
+                        completedComponents: true,
+                    },
+                    orderBy: {
+                        bingoLines: 'desc',
+                    }
+                },
+            },
+        });
+
+        if (!session) {
+            return { error: 'No active session found' };
+        }
+
+        // Parse unlocked components
+        const unlockedComponents = session.unlockedComponents
+            ? session.unlockedComponents.split(',')
+            : [];
+
+        return {
+            session: {
+                id: session.id,
+                code: session.code,
+                facilitatorEmail: session.facilitatorEmail,
+                unlockedComponents,
+                participantCount: session.participants.length,
+            },
+            participants: session.participants,
+        };
+
+    } catch (error) {
+        console.error('Failed to get facilitator session:', error);
+        return { error: 'Failed to load session' };
+    }
+}
+
+/**
+ * Delete/Terminate a session
+ */
+export async function deleteSession(sessionId: string) {
+    try {
+        const cookieStore = await cookies();
+        const sessionCookie = cookieStore.get('ai_bingo_session');
+        if (!sessionCookie) return { success: false, error: 'Not authenticated' };
+
+        const participant = await prisma.participant.findUnique({
+            where: { id: sessionCookie.value }
+        });
+        if (!participant) return { success: false, error: 'User not found' };
+
+        // Verify ownership
+        const session = await prisma.session.findUnique({ where: { id: sessionId } });
+        if (!session || session.facilitatorEmail !== participant.email) {
+            return { success: false, error: 'Unauthorized to delete this session' };
+        }
+
+        await prisma.session.delete({
+            where: { id: sessionId },
+        });
+
+        revalidatePath('/facilitator');
+        return { success: true };
+
+    } catch (error) {
+        console.error('Failed to delete session:', error);
+        return { success: false, error: 'Failed to delete session' };
     }
 }
 
@@ -104,7 +263,7 @@ export async function unlockNextComponent(sessionId: string, componentId: string
 }
 
 /**
- * Get session state for facilitator dashboard
+ * Get session state for facilitator dashboard (Legacy - kept for compatibility if needed, but getFacilitatorSession is preferred)
  */
 export async function getSessionState(sessionId: string) {
     try {
