@@ -71,8 +71,8 @@ export async function leaveSession() {
             where: { id: sessionCookie.value },
             data: {
                 sessionId: null,
-                passcode: null,
-                cardLayout: null,
+                passcode: '',
+                cardLayout: '',
                 completedComponents: '',
                 bingoLines: 0,
             },
