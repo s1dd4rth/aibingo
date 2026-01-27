@@ -37,41 +37,45 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full glass p-8 rounded-2xl relative overflow-hidden"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="max-w-md w-full schematic-card p-8 bg-card relative"
       >
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
+        <div className="flex flex-col gap-2 mb-8">
+          <div className="text-xs font-mono text-accent uppercase tracking-wider">Authentication Protocol</div>
+          <h1 className="text-4xl font-bold text-foreground">
+            AI BINGO<span className="text-primary">.QUEST</span>
+          </h1>
+        </div>
 
-        <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-          AI Bingo Quest
-        </h1>
-        <div className="flex justify-between items-center mb-8">
-          <p className="text-gray-400">Enter your email to receive a magic link.</p>
-          <Link href="/leaderboard" className="text-xs text-yellow-400 hover:text-yellow-300 flex items-center gap-1 transition-colors">
-            <span className="opacity-50">🏆</span> Leaderboard
+        <div className="flex justify-between items-center mb-8 border-b border-border pb-4">
+          <p className="text-muted-foreground font-mono text-xs">ESTABLISH_CONNECTION</p>
+          <Link href="/leaderboard" className="text-xs text-primary hover:text-primary/80 flex items-center gap-1 font-mono uppercase">
+            <span className="opacity-50">🏆</span> Leaderboard_View
           </Link>
         </div>
 
         {success ? (
           <div className="space-y-6 text-center">
             <div className="flex justify-center">
-              <div className="bg-green-500/20 p-4 rounded-full">
-                <Mail className="w-8 h-8 text-green-400" />
+              <div className="bg-primary/10 border border-primary p-4">
+                <Mail className="w-8 h-8 text-primary" />
               </div>
             </div>
-            <h2 className="text-xl text-white font-semibold">Check your inbox!</h2>
-            <p className="text-gray-400">We sent a magic link to <span className="text-white">{email}</span></p>
+            <div className="space-y-2">
+              <h2 className="text-xl text-foreground font-bold uppercase tracking-tight">Transmission Sent</h2>
+              <p className="text-muted-foreground font-mono text-sm">Target: <span className="text-foreground border-b border-primary">{email}</span></p>
+            </div>
 
             {previewUrl && (
-              <div className="mt-4 p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                <p className="text-xs text-blue-300 mb-2 uppercase tracking-wider font-bold">Dev Mode: Ethereal</p>
+              <div className="mt-4 p-4 border border-dashed border-accent/50 bg-accent/5">
+                <p className="text-xs text-accent mb-2 uppercase tracking-wider font-bold">Dev Mode: Ethereal</p>
                 <a
                   href={previewUrl}
                   target="_blank"
-                  className="text-blue-400 underline hover:text-blue-300 text-sm"
+                  className="text-accent hover:text-accent/80 underline text-sm font-mono block"
                 >
-                  Open Simulated Email ↗
+                  [OPEN_SIMULATED_EMAIL] ↗
                 </a>
               </div>
             )}
@@ -79,15 +83,15 @@ export default function LoginPage() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium text-gray-300">Email</label>
+              <label htmlFor="email" className="text-xs font-mono uppercase text-muted-foreground">User_Identity</label>
               <input
                 id="email"
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
-                placeholder="you@example.com"
+                className="w-full bg-input border border-border px-4 py-3 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-mono text-sm"
+                placeholder="USER@DOMAIN.EXT"
               />
             </div>
 
@@ -95,9 +99,9 @@ export default function LoginPage() {
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
-                className="text-red-400 text-sm bg-red-500/10 p-3 rounded-lg border border-red-500/20"
+                className="text-destructive font-mono text-xs bg-destructive/10 p-3 border border-destructive"
               >
-                {error}
+                ERROR: {error}
               </motion.div>
             )}
 
@@ -105,13 +109,13 @@ export default function LoginPage() {
               type="submit"
               disabled={isLoading}
               className={cn(
-                "w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-all transform active:scale-95",
+                "w-full schematic-btn py-3 flex items-center justify-center gap-2",
                 isLoading && "opacity-80 cursor-not-allowed"
               )}
             >
               {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
                 <>
-                  Send Magic Link <ArrowRight className="w-4 h-4" />
+                  INITIATE_MAGIC_LINK <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>

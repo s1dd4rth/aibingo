@@ -38,119 +38,113 @@ export default function DetailDrawer({ component, onClose, onComplete, status, i
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          className="absolute inset-0 bg-background/90"
         />
 
         <motion.div
           layoutId={`card-${component.id}`}
-          className="relative w-full max-w-2xl bg-[#111] border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+          className="relative w-full max-w-2xl bg-card border-2 border-border shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col max-h-[90vh]"
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
         >
-          <div className="p-6 border-b border-white/10 bg-gradient-to-r from-purple-900/20 to-blue-900/20">
+          <div className="p-6 border-b-2 border-border bg-muted/20">
             <div className="flex justify-between items-start">
               <div>
-                <div className="flex gap-2 mb-2">
-                  <span className="text-xs font-bold px-2 py-1 rounded bg-white/10 text-white/80">{component.period}</span>
-                  <span className="text-xs font-bold px-2 py-1 rounded bg-purple-500/20 text-purple-300">{component.family}</span>
+                <div className="flex gap-2 mb-2 font-mono uppercase text-xs">
+                  <span className="font-bold px-2 py-1 border border-border bg-background text-muted-foreground">{component.period}</span>
+                  <span className="font-bold px-2 py-1 border border-primary bg-primary/10 text-primary">{component.family}</span>
                 </div>
-                <h2 className="text-3xl font-bold text-white">{component.name}</h2>
+                <h2 className="text-3xl font-bold text-foreground font-sans uppercase tracking-tight">{component.name}</h2>
               </div>
-              <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                <X className="w-5 h-5 text-gray-400" />
+              <button onClick={onClose} className="p-2 hover:bg-destructive/10 hover:text-destructive border border-transparent hover:border-destructive transition-all">
+                <X className="w-5 h-5" />
               </button>
             </div>
           </div>
 
           <div className="p-6 space-y-8 overflow-y-auto">
             <div>
-              <h3 className="text-sm uppercase tracking-wider text-gray-500 font-semibold mb-2">Description</h3>
-              <p className="text-gray-300 leading-relaxed text-lg">{component.description}</p>
+              <h3 className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-2 font-mono">:: SYSTEM_DESCRIPTION</h3>
+              <p className="text-foreground leading-relaxed text-lg border-l-4 border-primary/50 pl-4">{component.description}</p>
             </div>
 
             {(component.why || component.what || component.how) && (
               <div className="grid gap-4 sm:grid-cols-3">
                 {component.why && (
-                  <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                    <div className="flex items-center gap-2 text-yellow-500 font-bold mb-2">
+                  <div className="bg-background p-4 border border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)]">
+                    <div className="flex items-center gap-2 text-primary font-bold mb-2 uppercase text-sm font-mono">
                       <Lightbulb className="w-4 h-4" /> Why?
                     </div>
-                    <p className="text-sm text-gray-400 leading-relaxed">{component.why}</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{component.why}</p>
                   </div>
                 )}
                 {component.what && (
-                  <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                    <div className="flex items-center gap-2 text-blue-400 font-bold mb-2">
+                  <div className="bg-background p-4 border border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)]">
+                    <div className="flex items-center gap-2 text-accent font-bold mb-2 uppercase text-sm font-mono">
                       <BookOpen className="w-4 h-4" /> What?
                     </div>
-                    <p className="text-sm text-gray-400 leading-relaxed">{component.what}</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{component.what}</p>
                   </div>
                 )}
                 {component.how && (
-                  <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                    <div className="flex items-center gap-2 text-green-400 font-bold mb-2">
+                  <div className="bg-background p-4 border border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)]">
+                    <div className="flex items-center gap-2 text-green-500 font-bold mb-2 uppercase text-sm font-mono">
                       <Wrench className="w-4 h-4" /> How?
                     </div>
-                    <p className="text-sm text-gray-400 leading-relaxed">{component.how}</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{component.how}</p>
                   </div>
                 )}
               </div>
             )}
 
             {(component.examples || component.codeSnippet) && (
-              <div className="bg-[#0d1117] rounded-xl overflow-hidden border border-white/10">
-                <div className="flex items-center justify-between bg-white/5 border-b border-white/10 px-2">
+              <div className="bg-background border border-border">
+                <div className="flex items-center justify-between border-b border-border px-2 bg-muted/10">
                   {component.examples ? (
-                    <div className="flex">
+                    <div className="flex gap-1 pt-2 px-2">
                       {component.examples.map((ex, idx) => (
                         <button
                           key={idx}
                           onClick={() => setActiveTab(idx)}
                           className={cn(
-                            "px-4 py-3 text-xs font-medium transition-colors relative",
+                            "px-4 py-2 text-xs font-bold font-mono uppercase transition-all border-t border-l border-r border-transparent",
                             activeTab === idx
-                              ? "text-blue-400"
-                              : "text-gray-400 hover:text-gray-200"
+                              ? "bg-background border-border border-b-background -mb-[1px] text-primary"
+                              : "text-muted-foreground hover:bg-muted/20"
                           )}
                         >
                           {ex.title}
-                          {activeTab === idx && (
-                            <motion.div
-                              layoutId="activeTab"
-                              className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-400"
-                            />
-                          )}
                         </button>
                       ))}
                     </div>
                   ) : (
-                    <span className="px-4 py-3 text-xs font-mono text-gray-400">Python (Gemini SDK)</span>
+                    <span className="px-4 py-3 text-xs font-mono font-bold uppercase text-muted-foreground">Python (Gemini SDK)</span>
                   )}
 
                   <button
                     onClick={() => copy(component.examples ? component.examples[activeTab].code : component.codeSnippet!)}
-                    className="mr-2 text-xs flex items-center gap-1.5 text-gray-400 hover:text-white transition-colors"
+                    className="mr-2 text-xs flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors font-mono uppercase"
                   >
-                    {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
-                    {copied ? 'Copied!' : 'Copy'}
+                    {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copied ? 'COPIED' : 'COPY_CODE'}
                   </button>
                 </div>
 
-                <div className="p-4 overflow-x-auto">
+                <div className="p-4 overflow-x-auto bg-black/20">
                   {component.examples ? (
                     <div className="space-y-4">
                       {component.examples[activeTab].description && (
-                        <p className="text-xs text-gray-400 italic border-l-2 border-white/10 pl-3">
-                          {component.examples[activeTab].description}
+                        <p className="text-xs text-muted-foreground italic border-l-2 border-accent pl-3">
+                          {`// ${component.examples[activeTab].description}`}
                         </p>
                       )}
-                      <pre className="text-xs sm:text-sm font-mono text-blue-100 leading-relaxed">
+                      <pre className="text-xs sm:text-sm font-mono text-foreground leading-relaxed">
                         <code>{component.examples[activeTab].code}</code>
                       </pre>
                     </div>
                   ) : (
-                    <pre className="text-xs sm:text-sm font-mono text-blue-100 leading-relaxed">
+                    <pre className="text-xs sm:text-sm font-mono text-foreground leading-relaxed">
                       <code>{component.codeSnippet}</code>
                     </pre>
                   )}
@@ -159,44 +153,44 @@ export default function DetailDrawer({ component, onClose, onComplete, status, i
             )}
 
             <div>
-              <h4 className="flex items-center gap-2 font-semibold text-blue-300 mb-2">
-                <ExternalLink className="w-4 h-4" /> Learning Resource
+              <h4 className="flex items-center gap-2 font-bold text-accent mb-2 uppercase font-mono text-sm">
+                <ExternalLink className="w-4 h-4" /> Learning_Resource
               </h4>
               {component.docUrl ? (
                 <a
                   href={component.docUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-[#4285F4]/10 hover:bg-[#4285F4]/20 text-[#4285F4] px-4 py-2 rounded-lg font-medium transition-colors border border-[#4285F4]/20"
+                  className="inline-flex items-center gap-2 bg-accent/10 hover:bg-accent/20 text-accent px-4 py-2 border border-accent/50 font-bold uppercase text-xs transition-colors"
                 >
-                  <img src="https://www.gstatic.com/devrel-devsite/prod/v22100755d6d376378546b95d03a1194270275815/developers/images/touchicon-180.png" alt="Google Developers" className="w-5 h-5 rounded-sm" />
-                  View Google Developer Docs
+                  <BookOpen className="w-4 h-4" />
+                  ACCESS_DOCUMENTATION
                   <ExternalLink className="w-4 h-4 ml-1" />
                 </a>
               ) : (
-                <p className="text-sm text-blue-200/80">Documentation coming soon for {component.name}.</p>
+                <p className="text-sm text-muted-foreground font-mono">{`// DOCS_PENDING...`}</p>
               )}
             </div>
           </div>
 
-          <div className="p-6 border-t border-white/10 bg-[#0f0f0f]">
+          <div className="p-6 border-t-2 border-border bg-muted/10">
             {isCompleted ? (
-              <div className="w-full bg-green-500/20 text-green-400 font-bold py-4 rounded-xl flex items-center justify-center gap-2 border border-green-500/30">
-                <CheckCircle className="w-5 h-5" /> Module Completed
+              <div className="w-full bg-green-500/10 text-green-500 font-bold py-4 border border-green-500 flex items-center justify-center gap-2 uppercase tracking-wide">
+                <CheckCircle className="w-5 h-5" /> Module_Verified
               </div>
             ) : (
               <button
                 onClick={handleAction}
                 disabled={isCompleting || status === 'locked'}
                 className={cn(
-                  "w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-cyan-500/20",
+                  "w-full py-4 font-bold flex items-center justify-center gap-2 transition-all uppercase tracking-wide border-2",
                   {
-                    'bg-white text-black hover:bg-gray-200': status === 'unlocked',
-                    'bg-gray-800 text-gray-500 cursor-not-allowed': status === 'locked',
+                    'bg-primary text-primary-foreground border-primary hover:translate-x-[2px] hover:translate-y-[2px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px]': status === 'unlocked',
+                    'bg-muted text-muted-foreground border-border cursor-not-allowed opacity-50': status === 'locked',
                   }
                 )}
               >
-                {isCompleting ? <Loader2 className="w-5 h-5 animate-spin" /> : status === 'locked' ? 'Locked (Complete Previous Modules)' : 'Mark as Complete'}
+                {isCompleting ? <Loader2 className="w-5 h-5 animate-spin" /> : status === 'locked' ? 'LOCKED [COMPLETE_PREV]' : 'MARK_AS_COMPLETE'}
               </button>
             )}
           </div>

@@ -33,17 +33,17 @@ export default function SessionJoin({ currentSession, participantId }: { current
     }
 
     return (
-        <div className="glass p-6 rounded-xl border border-white/10 space-y-4">
+        <div className="schematic-card p-6 space-y-4">
             <div className="flex items-center gap-4">
-                <div className="bg-purple-500/20 p-3 rounded-lg">
-                    <Users className="w-6 h-6 text-purple-400" />
+                <div className="bg-primary/10 p-3 border border-primary">
+                    <Users className="w-6 h-6 text-primary" />
                 </div>
                 <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-white">Live Workshop Session</h3>
-                    <p className="text-gray-400 text-sm">
+                    <h3 className="text-lg font-bold text-foreground uppercase tracking-tight">Live Workshop_Session</h3>
+                    <p className="text-muted-foreground text-xs font-mono">
                         {isInSession
-                            ? `Connected to session: ${currentSession}`
-                            : "Enter a session code to join a facilitated workshop"}
+                            ? `STATUS: CONNECTED >> ${currentSession}`
+                            : "INPUT SESSION_CODE TO INITIATE LINK"}
                     </p>
                 </div>
             </div>
@@ -53,31 +53,31 @@ export default function SessionJoin({ currentSession, participantId }: { current
                     <div className="flex gap-2">
                         <input
                             type="text"
-                            placeholder="Enter Session Code (e.g., ABC123)"
+                            placeholder="CODE_INPUT (e.g., ABC123)"
                             value={code}
                             onChange={(e) => setCode(e.target.value.toUpperCase())}
                             maxLength={6}
-                            className="bg-black/30 flex-1 border border-white/10 rounded-lg px-4 py-2 text-white uppercase font-mono tracking-wider focus:outline-none focus:border-purple-500 transition-colors"
+                            className="flex-1 bg-input border border-border px-4 py-2 text-foreground uppercase font-mono tracking-wider focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-sm"
                         />
                         <button
                             onClick={handleJoin}
                             disabled={isLoading || !code || code.length !== 6}
-                            className="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="schematic-btn px-6 py-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
                         >
-                            {isLoading ? '...' : <><LogIn className="w-4 h-4" /> Join</>}
+                            {isLoading ? '...' : <><LogIn className="w-4 h-4" /> LINK</>}
                         </button>
                     </div>
 
                     {error && (
-                        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-400 text-sm">
-                            {error}
+                        <div className="bg-destructive/10 border border-destructive p-2 text-destructive text-xs font-mono">
+                            ERROR: {error}
                         </div>
                     )}
 
-                    <div className="text-xs text-gray-500">
-                        Don't have a code? Ask your facilitator or{' '}
-                        <Link href="/facilitator" className="text-purple-400 hover:text-purple-300 underline">
-                            create your own session
+                    <div className="text-xs text-muted-foreground font-mono">
+                        NO_CODE? REQUEST_FROM_FACILITATOR OR{' '}
+                        <Link href="/facilitator" className="text-primary hover:underline uppercase">
+                            [CREATE_SESSION]
                         </Link>
                     </div>
                 </div>
@@ -86,15 +86,15 @@ export default function SessionJoin({ currentSession, participantId }: { current
             {isInSession && (
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-2 rounded-lg text-sm font-mono">
-                            ● CONNECTED
+                        <div className="bg-green-500/10 border border-green-500 text-green-500 px-4 py-2 text-xs font-mono uppercase">
+                            ● LINK_ESTABLISHED
                         </div>
                     </div>
                     <Link
                         href="/leaderboard"
-                        className="text-sm text-yellow-400 hover:text-yellow-300 underline flex items-center gap-1"
+                        className="text-sm text-primary hover:text-primary/80 underline flex items-center gap-1 font-mono uppercase"
                     >
-                        <span className="opacity-70">🏆</span> View Leaderboard
+                        <span className="opacity-70">🏆</span> Leaderboard_View
                     </Link>
                 </div>
             )}

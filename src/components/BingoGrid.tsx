@@ -73,17 +73,17 @@ export default function BingoGrid({ participant, session }: BingoGridProps) {
         <>
             {/* Bingo Lines Indicator */}
             {participant.bingoLines > 0 && (
-                <div className="glass rounded-xl p-4 border border-yellow-500/20 bg-yellow-500/5 mb-6">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <span className="text-4xl">🎯</span>
-                            <div>
-                                <div className="text-xl font-bold text-yellow-400">
-                                    {participant.bingoLines} Bingo Line{participant.bingoLines !== 1 ? 's' : ''}!
-                                </div>
-                                <div className="text-sm text-gray-400">
-                                    {completedIds.length} / 20 components completed
-                                </div>
+                <div className="schematic-card p-4 bg-primary/10 border-primary mb-6 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className="bg-primary text-primary-foreground px-3 py-1 font-bold text-2xl font-mono">
+                            {participant.bingoLines}
+                        </div>
+                        <div>
+                            <div className="text-xl font-bold text-primary uppercase tracking-tight">
+                                Bingo Line{participant.bingoLines !== 1 ? 's' : ''} ACQUIRED
+                            </div>
+                            <div className="text-sm text-muted-foreground font-mono">
+                                PROGRESS: {completedIds.length} / 20 MODULES
                             </div>
                         </div>
                     </div>
@@ -127,9 +127,9 @@ export default function BingoGrid({ participant, session }: BingoGridProps) {
                 <motion.div
                     initial={{ opacity: 0, y: 50 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-500 to-orange-500 text-black px-8 py-4 rounded-full font-bold shadow-2xl z-50 flex items-center gap-2"
+                    className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-8 py-4 border-2 border-primary-foreground shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] z-50 flex items-center gap-2 font-bold uppercase tracking-widest text-xl"
                 >
-                    🎉 Full Card Complete! You are an AI Master!
+                    🎉 SYSTEM_MASTERY_ACHIEVED
                 </motion.div>
             )}
 

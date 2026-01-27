@@ -5,6 +5,7 @@ import { createSession, getSessionState, unlockNextComponent } from '@/actions/s
 import { GAME_COMPONENTS } from '@/lib/game-config';
 import { Trophy, Users, Unlock, CheckCircle2, Lock } from 'lucide-react';
 import Link from 'next/link';
+import { cn } from "@/lib/utils";
 
 interface SessionState {
     session: {
@@ -114,27 +115,30 @@ export default function FacilitatorPage() {
 
     if (!sessionState) {
         return (
-            <div className="min-h-screen bg-black text-white p-8">
-                <div className="max-w-2xl mx-auto space-y-8">
-                    <div className="text-center space-y-4">
-                        <h1 className="text-4xl font-bold">Facilitator Dashboard</h1>
-                        <p className="text-gray-400">
-                            Create a session to start teaching AI concepts with bingo!
+            <div className="min-h-screen bg-background text-foreground p-8 font-sans flex items-center justify-center">
+                <div className="max-w-2xl w-full text-center space-y-8 schematic-card p-12 bg-card">
+                    <div className="space-y-4">
+                        <div className="inline-block p-4 border-2 border-primary bg-primary/10">
+                            <Trophy className="w-12 h-12 text-primary" />
+                        </div>
+                        <h1 className="text-4xl font-bold uppercase tracking-tighter">Facilitator_Console</h1>
+                        <p className="text-muted-foreground font-mono">
+                            INITIALIZE_NEW_SESSION_TO_BEGIN
                         </p>
                     </div>
 
                     {error && (
-                        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-red-400">
-                            {error}
+                        <div className="bg-destructive/10 border border-destructive p-4 text-destructive font-mono text-sm">
+                            ERROR: {error}
                         </div>
                     )}
 
                     <button
                         onClick={handleCreateSession}
                         disabled={loading}
-                        className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/50 text-white font-bold py-4 px-6 rounded-lg transition-colors"
+                        className="w-full schematic-btn py-4 text-lg"
                     >
-                        {loading ? 'Creating Session...' : 'Create New Session'}
+                        {loading ? 'INITIALIZING...' : 'CREATE_NEW_SESSION'}
                     </button>
                 </div>
             </div>
@@ -145,44 +149,44 @@ export default function FacilitatorPage() {
     const nextToUnlock = allComponents.find(c => !unlockedSet.has(c.id));
 
     return (
-        <div className="min-h-screen bg-black text-white p-8">
+        <div className="min-h-screen bg-background text-foreground p-8 font-sans">
             <div className="max-w-6xl mx-auto space-y-8">
                 {/* Header */}
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between border-b border-border pb-8">
                     <div>
-                        <h1 className="text-4xl font-bold">Facilitator Dashboard</h1>
-                        <p className="text-gray-400 mt-2">Control the learning flow for your session</p>
+                        <h1 className="text-4xl font-bold uppercase tracking-tighter">Facilitator_Control</h1>
+                        <p className="text-muted-foreground mt-2 font-mono text-xs uppercase">{`// SESSION_MANAGEMENT_INTERFACE`}</p>
                     </div>
                     <div className="flex items-center gap-3">
                         <Link
                             href="/leaderboard"
-                            className="flex items-center gap-2 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 px-4 py-2 rounded-lg transition-colors"
+                            className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary px-4 py-2 uppercase font-bold text-xs"
                         >
-                            <Trophy className="w-5 h-5" />
-                            View Leaderboard
+                            <Trophy className="w-4 h-4" />
+                            Leaderboard
                         </Link>
                         <button
                             onClick={handleEndSession}
-                            className="flex items-center gap-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 px-4 py-2 rounded-lg transition-colors"
+                            className="flex items-center gap-2 bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive px-4 py-2 uppercase font-bold text-xs"
                         >
-                            End Session
+                            TERMINATE_SESSION
                         </button>
                     </div>
                 </div>
 
                 {/* Session Info */}
-                <div className="glass rounded-2xl p-6 border border-white/10">
+                <div className="schematic-card p-6 bg-card">
                     <div className="flex items-center justify-between">
                         <div>
-                            <div className="text-sm text-gray-400 mb-1">Session Code</div>
-                            <div className="text-4xl font-black tracking-widest text-purple-400">
+                            <div className="text-xs text-muted-foreground mb-1 font-mono uppercase">Session_Code</div>
+                            <div className="text-4xl font-black tracking-widest text-primary font-mono border-2 border-primary inline-block px-4 py-2 bg-primary/5">
                                 {sessionState.session.code}
                             </div>
                         </div>
                         <div className="text-right">
-                            <div className="text-sm text-gray-400 mb-1">Participants</div>
-                            <div className="flex items-center gap-2 text-2xl font-bold">
-                                <Users className="w-6 h-6 text-blue-400" />
+                            <div className="text-xs text-muted-foreground mb-1 font-mono uppercase">Active_Unit_Count</div>
+                            <div className="flex items-center justify-end gap-2 text-2xl font-bold font-mono">
+                                <Users className="w-6 h-6 text-accent" />
                                 {sessionState.session.participantCount}
                             </div>
                         </div>
@@ -190,55 +194,58 @@ export default function FacilitatorPage() {
                 </div>
 
                 {/* Progress */}
-                <div className="glass rounded-2xl p-6 border border-white/10">
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-2xl font-bold">Learning Progress</h2>
-                        <div className="text-gray-400">
-                            {sessionState.session.unlockedComponents.length} / {allComponents.length} unlocked
+                <div className="schematic-card p-6 bg-card space-y-6">
+                    <div className="flex items-center justify-between border-b border-border pb-4">
+                        <h2 className="text-2xl font-bold uppercase tracking-tight">System_Progression</h2>
+                        <div className="text-muted-foreground font-mono">
+                            [{sessionState.session.unlockedComponents.length} / {allComponents.length}] UNLOCKED
                         </div>
                     </div>
 
                     {/* Next to Unlock */}
                     {nextToUnlock && (
-                        <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4 mb-6">
-                            <div className="flex items-center justify-between">
+                        <div className="bg-muted/10 border border-muted-foreground/20 p-4 mb-6 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-1 bg-primary text-primary-foreground text-[10px] uppercase font-bold">Next_Action</div>
+                            <div className="flex items-center justify-between relative z-10">
                                 <div>
-                                    <div className="text-sm text-purple-400 mb-1">Next Component</div>
-                                    <div className="text-xl font-bold">{nextToUnlock.name}</div>
-                                    <div className="text-sm text-gray-400 mt-1">{nextToUnlock.period}</div>
+                                    <div className="text-xs text-primary mb-1 uppercase font-mono">Pending_Component</div>
+                                    <div className="text-xl font-bold uppercase">{nextToUnlock.name}</div>
+                                    <div className="text-xs text-muted-foreground mt-1 font-mono">{nextToUnlock.period}</div>
                                 </div>
                                 <button
                                     onClick={() => handleUnlockNext(nextToUnlock.id)}
                                     disabled={loading}
-                                    className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/50 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+                                    className="schematic-btn py-3 px-6 flex items-center gap-2"
                                 >
-                                    <Unlock className="w-5 h-5" />
-                                    Unlock for All
+                                    <Unlock className="w-4 h-4" />
+                                    UNLOCK_COMPONENT
                                 </button>
                             </div>
                         </div>
                     )}
 
                     {/* Component List */}
-                    <div className="space-y-2">
+                    <div className="space-y-2 grid grid-cols-2 gap-4">
                         {allComponents.map((component) => {
                             const isUnlocked = unlockedSet.has(component.id);
                             return (
                                 <div
                                     key={component.id}
-                                    className={`flex items-center gap-3 p-3 rounded-lg ${isUnlocked
-                                        ? 'bg-green-500/10 border border-green-500/20'
-                                        : 'bg-white/5 border border-white/10'
-                                        }`}
+                                    className={cn(
+                                        "flex items-center gap-3 p-3 border",
+                                        isUnlocked
+                                            ? 'bg-green-500/10 border-green-500'
+                                            : 'bg-muted/5 border-border opacity-60'
+                                    )}
                                 >
                                     {isUnlocked ? (
-                                        <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" />
+                                        <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
                                     ) : (
-                                        <Lock className="w-5 h-5 text-gray-600 flex-shrink-0" />
+                                        <Lock className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                                     )}
-                                    <div className="flex-1">
-                                        <div className="font-medium">{component.name}</div>
-                                        <div className="text-sm text-gray-400">{component.period}</div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="font-bold text-sm uppercase truncate">{component.name}</div>
+                                        <div className="text-xs text-muted-foreground font-mono">{component.period}</div>
                                     </div>
                                 </div>
                             );
@@ -247,12 +254,12 @@ export default function FacilitatorPage() {
                 </div>
 
                 {/* Participant List */}
-                <div className="glass rounded-2xl p-6 border border-white/10">
-                    <h2 className="text-2xl font-bold mb-4">Participants</h2>
+                <div className="schematic-card p-6 bg-card">
+                    <h2 className="text-2xl font-bold mb-4 uppercase tracking-tight border-b border-border pb-4">Participant_Log</h2>
                     <div className="space-y-2">
                         {sessionState.participants.length === 0 ? (
-                            <div className="text-center text-gray-500 py-8">
-                                No participants yet. Share the session code!
+                            <div className="text-center text-muted-foreground py-8 font-mono border border-dashed border-border uppercase">
+                                Waiting_For_Connections...
                             </div>
                         ) : (
                             sessionState.participants.map((participant) => {
@@ -263,21 +270,21 @@ export default function FacilitatorPage() {
                                 return (
                                     <div
                                         key={participant.id}
-                                        className="flex items-center justify-between p-3 bg-white/5 rounded-lg"
+                                        className="flex items-center justify-between p-3 border border-border hover:border-primary transition-colors bg-background"
                                     >
                                         <div>
-                                            <div className="font-medium">
+                                            <div className="font-bold uppercase text-sm">
                                                 {participant.name || participant.email.split('@')[0]}
                                             </div>
-                                            <div className="text-sm text-gray-400">{participant.email}</div>
+                                            <div className="text-xs text-muted-foreground font-mono">{participant.email}</div>
                                         </div>
                                         <div className="text-right">
-                                            <div className="text-sm text-gray-400">Bingo Lines</div>
-                                            <div className="text-xl font-bold text-yellow-400">
+                                            <div className="text-[10px] text-muted-foreground uppercase font-bold">Bingo_Lines</div>
+                                            <div className="text-xl font-bold text-primary font-mono">
                                                 {participant.bingoLines}
                                             </div>
-                                            <div className="text-xs text-gray-500">
-                                                {completedCount} / {allComponents.length} completed
+                                            <div className="text-[10px] text-muted-foreground font-mono">
+                                                {completedCount}/{allComponents.length} DONE
                                             </div>
                                         </div>
                                     </div>

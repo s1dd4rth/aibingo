@@ -44,3 +44,15 @@ next-env.d.ts
 # AI Agent folders
 .claude
 
+
+# database
+*.db
+*.sqlite
+
+# Agent and IDE folders
+.agent/
+.agents/
+.cursor/
+.gemini/
+.kiro/
+.opencode/

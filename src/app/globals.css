@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
 @theme {
+  --font-sans: var(--font-space-grotesk);
+  --font-mono: var(--font-space-mono);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
@@ -16,40 +19,94 @@
 }
 
 :root {
-  --background: hsl(240 10% 3.9%);
-  --foreground: hsl(0 0% 98%);
+  /* Neo-Brutalist Schematic Palette */
+  /* Deep Slate Background */
+  --background: hsl(222 47% 11%);
+  /* #0F172A */
+  --foreground: hsl(210 40% 98%);
+  /* #F8FAFC */
 
-  --primary: hsl(263.4 70% 50.4%);
-  --primary-foreground: hsl(210 40% 98%);
+  /* Vibrant Orange Primary */
+  --primary: hsl(24 95% 53%);
+  /* #F97316 */
+  --primary-foreground: hsl(222 47% 11%);
 
-  --card: hsl(240 10% 3.9%);
-  --card-foreground: hsl(0 0% 98%);
+  /* Surface / Card - Slightly Lighter Slate */
+  --card: hsl(217 33% 17%);
+  /* #1E293B */
+  --card-foreground: hsl(210 40% 98%);
 
-  --border: hsl(240 3.7% 15.9%);
-  --input: hsl(240 3.7% 15.9%);
+  /* Borders - Visible and Sharp */
+  --border: hsl(215 28% 30%);
+  /* #334155 */
+  --input: hsl(217 33% 17%);
 
-  --destructive: hsl(0 62.8% 30.6%);
+  /* Destructive - Red */
+  --destructive: hsl(0 84% 60%);
 
-  --accent: hsl(240 3.7% 15.9%);
-  --accent-foreground: hsl(0 0% 98%);
+  /* Accent - Cyan for Tech/Data feel */
+  --accent: hsl(186 70% 43%);
+  /* #06B6D4 */
+  --accent-foreground: hsl(210 40% 98%);
 
-  --ring: hsl(240 4.9% 83.9%);
+  --ring: hsl(24 95% 53%);
+
+  --radius: 0px;
+  /* Hard edges */
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  background-image: radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
-  background-attachment: fixed;
+  /* Subtle grid pattern for schematic feel */
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
 }
 
-.glass {
-  background-color: rgba(255, 255, 255, 0.05);
-  /* bg-white/5 */
-  backdrop-filter: blur(16px);
-  /* backdrop-blur-lg */
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  /* border-white/10 */
-  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-  /* shadow-xl */
+/* Schematic Utilities */
+.schematic-card {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 0.5);
+  /* Hard shadow */
+}
+
+.schematic-btn {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border: 1px solid var(--primary);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.1s ease;
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 0.5);
+}
+
+.schematic-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 0.5);
+}
+
+.schematic-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.5);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
 }
