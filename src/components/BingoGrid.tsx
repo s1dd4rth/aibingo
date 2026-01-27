@@ -103,7 +103,8 @@ export default function BingoGrid({ participant, session }: BingoGridProps) {
                             key={componentId}
                             component={component}
                             status={status}
-                            onClick={() => setSelectedComponentId(componentId)}
+                            onUnlock={() => setSelectedComponentId(componentId)}
+                            onComplete={() => handleComplete(componentId)}
                             index={index}
                             aria-label={`Bingo card for ${component.name}, status: ${status}`}
                         />
