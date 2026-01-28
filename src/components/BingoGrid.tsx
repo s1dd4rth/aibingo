@@ -35,9 +35,11 @@ export default function BingoGrid({ participant, session }: BingoGridProps) {
         const setupRealtime = async () => {
             const { subscribeToSession } = await import('@/lib/supabase');
 
+            console.log('🔌 Setting up Realtime for session:', session.id);
+
             // Subscribe to session changes (facilitator unlocking components)
             unsubscribe = subscribeToSession(session.id, async (payload) => {
-                console.log('Session updated (participant view):', payload);
+                console.log('⚡ Session updated (participant view):', payload);
                 // Refresh the page to get latest unlocked components
                 router.refresh();
             });
