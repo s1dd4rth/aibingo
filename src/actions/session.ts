@@ -128,6 +128,7 @@ export async function getFacilitatorSession() {
                         name: true,
                         email: true,
                         bingoLines: true,
+                        bonusPoints: true,
                         completedComponents: true,
                     },
                     orderBy: {
@@ -146,12 +147,19 @@ export async function getFacilitatorSession() {
             ? session.unlockedComponents.split(',')
             : [];
 
+        // Parse unlocked bonus cards
+        const unlockedBonusCards = session.unlockedBonusCards
+            ? session.unlockedBonusCards.split(',')
+            : [];
+
         return {
             session: {
                 id: session.id,
                 code: session.code,
                 facilitatorEmail: session.facilitatorEmail,
                 unlockedComponents,
+                unlockedBonusCards,
+                bonusEnabled: session.bonusEnabled,
                 participantCount: session.participants.length,
             },
             participants: session.participants,
