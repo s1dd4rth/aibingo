@@ -26,31 +26,7 @@ export default function BingoGrid({ participant, session }: BingoGridProps) {
     const [isCompleting, setIsCompleting] = useState(false);
     const router = useRouter();
 
-    // Real-time subscription to session updates (for unlocked components)
-    useEffect(() => {
-        if (!session?.id) return;
 
-        let unsubscribe: (() => void) | undefined;
-
-        const setupRealtime = async () => {
-            const { subscribeToSession } = await import('@/lib/supabase');
-
-            console.log('🔌 Setting up Realtime for session:', session.id);
-
-            // Subscribe to session changes (facilitator unlocking components)
-            unsubscribe = subscribeToSession(session.id, async (payload) => {
-                console.log('⚡ Session updated (participant view):', payload);
-                // Refresh the page to get latest unlocked components
-                router.refresh();
-            });
-        };
-
-        setupRealtime();
-
-        return () => {
-            if (unsubscribe) unsubscribe();
-        };
-    }, [session?.id, router]);
 
     // Get all components as a map for quick lookup
     const componentMap = new Map(

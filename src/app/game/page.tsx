@@ -4,6 +4,7 @@ import { getGameState } from '@/actions/game';
 import BingoGrid from '@/components/BingoGrid';
 import BonusGrid from '@/components/BonusGrid';
 import BrandHeader from '@/components/BrandHeader';
+import GameView from '@/components/GameView';
 import { redirect } from 'next/navigation';
 
 export default async function GamePage() {
@@ -30,35 +31,15 @@ export default async function GamePage() {
                 </p>
             </div>
 
-            <SessionJoin
-                currentSession={state.session?.code || state.participant.passcode}
-                participantId={state.participant.id}
-            />
-            <ColabSetup />
-
-            <BingoGrid
-                participant={state.participant}
-                session={state.session ? {
-                    id: state.session.id,
-                    unlockedComponents: state.session.unlockedComponents
-                } : null}
-            />
-
-            {/* Bonus Cards Section */}
-            {state.session && (
-                <BonusGrid
-                    participant={{
-                        id: state.participant.id,
-                        completedComponents: state.participant.completedComponents,
-                        completedBonusCards: state.participant.completedBonusCards,
-                        bonusPoints: state.participant.bonusPoints,
-                        bingoLines: state.participant.bingoLines,
-                    }}
-                    session={{
-                        id: state.session.id,
-                        unlockedBonusCards: state.session.unlockedBonusCards,
-                        bonusEnabled: state.session.bonusEnabled,
-                    }}
+            {state.session ? (
+                <GameView
+                    initialParticipant={state.participant}
+                    initialSession={state.session}
+                />
+            ) : (
+                <SessionJoin
+                    participantId={state.participant.id}
+                    currentSession={state.participant.passcode}
                 />
             )}
         </div>
