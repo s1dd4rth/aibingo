@@ -397,24 +397,17 @@ export async function getCurrentSession() {
             ? participant.session.unlockedComponents.split(',')
             : [];
 
-        return {
-            session: {
-                id: participant.session.id,
-                code: participant.session.code,
-                unlockedComponents,
-            },
-            let cardLayout = participant.cardLayout ? participant.cardLayout.split(',') : [];
-            const completedComponents = participant.completedComponents
-                ? participant.completedComponents.split(',')
-                : [];
+        let cardLayout = participant.cardLayout ? participant.cardLayout.split(',') : [];
+        const completedComponents = participant.completedComponents
+            ? participant.completedComponents.split(',')
+            : [];
 
-            // Validate Card Layout (Self-Healing)
-            // Check if layout size is wrong or contains invalid IDs (e.g., deleted components)
-            const validIds = new Set(GAME_COMPONENTS.map(c => c.id));
-            const hasInvalidIds = cardLayout.some(id => !validIds.has(id));
-            const isWrongSize = cardLayout.length !== 20;
+        // Validate Card Layout (Self-Healing)
+        const validIds = new Set(GAME_COMPONENTS.map(c => c.id));
+        const hasInvalidIds = cardLayout.some(id => !validIds.has(id));
+        const isWrongSize = cardLayout.length !== 20;
 
-            if(hasInvalidIds || isWrongSize) {
+        if (hasInvalidIds || isWrongSize) {
             console.log(`🔧 Self-healing layout for user ${participant.id} (Invalid: ${hasInvalidIds}, Size: ${cardLayout.length})`);
 
             const newLayout = generateRandomCardLayout();
