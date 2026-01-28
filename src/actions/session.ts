@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { generateSessionCode, generateRandomCardLayout } from '@/lib/bingo';
+import { GAME_COMPONENTS } from '@/lib/game-config';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { checkRateLimit } from '@/lib/rate-limiter';
@@ -402,14 +403,48 @@ export async function getCurrentSession() {
                 code: participant.session.code,
                 unlockedComponents,
             },
+            let cardLayout = participant.cardLayout ? participant.cardLayout.split(',') : [];
+            const completedComponents = participant.completedComponents
+                ? participant.completedComponents.split(',')
+                : [];
+
+            // Validate Card Layout (Self-Healing)
+            // Check if layout size is wrong or contains invalid IDs (e.g., deleted components)
+            const validIds = new Set(GAME_COMPONENTS.map(c => c.id));
+            const hasInvalidIds = cardLayout.some(id => !validIds.has(id));
+            const isWrongSize = cardLayout.length !== 20;
+
+            if(hasInvalidIds || isWrongSize) {
+            console.log(`🔧 Self-healing layout for user ${participant.id} (Invalid: ${hasInvalidIds}, Size: ${cardLayout.length})`);
+
+            const newLayout = generateRandomCardLayout();
+            await prisma.participant.update({
+                where: { id: participant.id },
+                data: { cardLayout: newLayout.join(',') }
+            });
+            cardLayout = newLayout;
+        }
+
+        return {
+            session: {
+                id: participant.session.id,
+                code: participant.session.code,
+                unlockedComponents,
+                bonusEnabled: participant.session.bonusEnabled,
+                unlockedBonusCards: participant.session.unlockedBonusCards
+                    ? participant.session.unlockedBonusCards.split(',')
+                    : [],
+            },
             participant: {
                 id: participant.id,
                 name: participant.name,
-                cardLayout: participant.cardLayout ? participant.cardLayout.split(',') : [],
-                completedComponents: participant.completedComponents
-                    ? participant.completedComponents.split(',')
-                    : [],
+                cardLayout,
+                completedComponents,
                 bingoLines: participant.bingoLines,
+                bonusPoints: participant.bonusPoints,
+                completedBonusCards: participant.completedBonusCards
+                    ? participant.completedBonusCards.split(',')
+                    : [],
             },
         };
     } catch (error) {
