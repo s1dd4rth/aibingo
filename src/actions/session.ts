@@ -440,89 +440,138 @@ export async function getCurrentSession() {
                     : [],
             },
         };
-    } catch (error) {
-        console.error('Failed to get current session:', error);
-        return { error: 'Failed to load session' };
-    }
-}
+        /**
+         * Lightweight polling for session status (Robust fallback)
+         */
+        export async function getSessionStatus() {
+            try {
+                const cookieStore = await cookies();
+                const sessionCookie = cookieStore.get('ai_bingo_session');
 
-/**
- * Toggle bonus cards for the entire session (facilitator only)
- */
-export async function toggleBonusCards(sessionId: string, enabled: boolean) {
-    try {
-        const cookieStore = await cookies();
-        const sessionCookie = cookieStore.get('ai_bingo_session');
-        if (!sessionCookie) return { success: false, error: 'Not authenticated' };
+                if (!sessionCookie) {
+                    return { error: 'Not logged in' };
+                }
 
-        const participant = await prisma.participant.findUnique({
-            where: { id: sessionCookie.value }
-        });
-        if (!participant) return { success: false, error: 'User not found' };
+                const participant = await prisma.participant.findUnique({
+                    where: { id: sessionCookie.value },
+                    select: {
+                        sessionId: true,
+                        session: {
+                            select: {
+                                unlockedComponents: true,
+                                unlockedBonusCards: true,
+                                bonusEnabled: true,
+                            }
+                        },
+                        // Also get self-status in case of other device updates
+                        completedComponents: true,
+                        completedBonusCards: true,
+                        bingoLines: true,
+                        bonusPoints: true
+                    }
+                });
 
-        // Verify ownership
-        const session = await prisma.session.findUnique({ where: { id: sessionId } });
-        if (!session || session.facilitatorEmail !== participant.email) {
-            return { success: false, error: 'Unauthorized' };
+                if (!participant || !participant.session) {
+                    return { error: 'No active session' };
+                }
+
+                return {
+                    success: true,
+                    data: {
+                        unlockedComponents: participant.session.unlockedComponents ? participant.session.unlockedComponents.split(',') : [],
+                        unlockedBonusCards: participant.session.unlockedBonusCards ? participant.session.unlockedBonusCards.split(',') : [],
+                        bonusEnabled: participant.session.bonusEnabled,
+                        participant: {
+                            completedComponents: participant.completedComponents ? participant.completedComponents.split(',') : [],
+                            completedBonusCards: participant.completedBonusCards ? participant.completedBonusCards.split(',') : [],
+                            bingoLines: participant.bingoLines,
+                            bonusPoints: participant.bonusPoints
+                        }
+                    }
+                };
+
+            } catch (error) {
+                return { error: 'Failed to poll status' };
+            }
         }
 
-        await prisma.session.update({
-            where: { id: sessionId },
-            data: { bonusEnabled: enabled }
-        });
+        /**
+         * Toggle bonus cards for the entire session (facilitator only)
+         */
+        export async function toggleBonusCards(sessionId: string, enabled: boolean) {
+            try {
+                const cookieStore = await cookies();
+                const sessionCookie = cookieStore.get('ai_bingo_session');
+                if (!sessionCookie) return { success: false, error: 'Not authenticated' };
 
-        revalidatePath('/facilitator');
-        revalidatePath('/game');
+                const participant = await prisma.participant.findUnique({
+                    where: { id: sessionCookie.value }
+                });
+                if (!participant) return { success: false, error: 'User not found' };
 
-        return { success: true, bonusEnabled: enabled };
-    } catch (error) {
-        console.error('Failed to toggle bonus cards:', error);
-        return { success: false, error: 'Failed to toggle bonus cards' };
-    }
-}
+                // Verify ownership
+                const session = await prisma.session.findUnique({ where: { id: sessionId } });
+                if (!session || session.facilitatorEmail !== participant.email) {
+                    return { success: false, error: 'Unauthorized' };
+                }
 
-/**
- * Unlock a specific bonus component (facilitator only)
- */
-export async function unlockBonusComponent(sessionId: string, componentId: string) {
-    try {
-        const cookieStore = await cookies();
-        const sessionCookie = cookieStore.get('ai_bingo_session');
-        if (!sessionCookie) return { success: false, error: 'Not authenticated' };
+                await prisma.session.update({
+                    where: { id: sessionId },
+                    data: { bonusEnabled: enabled }
+                });
 
-        const participant = await prisma.participant.findUnique({
-            where: { id: sessionCookie.value }
-        });
-        if (!participant) return { success: false, error: 'User not found' };
+                revalidatePath('/facilitator');
+                revalidatePath('/game');
 
-        // Verify ownership
-        const session = await prisma.session.findUnique({ where: { id: sessionId } });
-        if (!session || session.facilitatorEmail !== participant.email) {
-            return { success: false, error: 'Unauthorized' };
+                return { success: true, bonusEnabled: enabled };
+            } catch (error) {
+                console.error('Failed to toggle bonus cards:', error);
+                return { success: false, error: 'Failed to toggle bonus cards' };
+            }
         }
 
-        // Add to unlocked bonus cards
-        const unlocked = session.unlockedBonusCards
-            ? session.unlockedBonusCards.split(',').filter(Boolean)
-            : [];
+        /**
+         * Unlock a specific bonus component (facilitator only)
+         */
+        export async function unlockBonusComponent(sessionId: string, componentId: string) {
+            try {
+                const cookieStore = await cookies();
+                const sessionCookie = cookieStore.get('ai_bingo_session');
+                if (!sessionCookie) return { success: false, error: 'Not authenticated' };
 
-        if (!unlocked.includes(componentId)) {
-            unlocked.push(componentId);
+                const participant = await prisma.participant.findUnique({
+                    where: { id: sessionCookie.value }
+                });
+                if (!participant) return { success: false, error: 'User not found' };
+
+                // Verify ownership
+                const session = await prisma.session.findUnique({ where: { id: sessionId } });
+                if (!session || session.facilitatorEmail !== participant.email) {
+                    return { success: false, error: 'Unauthorized' };
+                }
+
+                // Add to unlocked bonus cards
+                const unlocked = session.unlockedBonusCards
+                    ? session.unlockedBonusCards.split(',').filter(Boolean)
+                    : [];
+
+                if (!unlocked.includes(componentId)) {
+                    unlocked.push(componentId);
+                }
+
+                await prisma.session.update({
+                    where: { id: sessionId },
+                    data: {
+                        unlockedBonusCards: unlocked.join(','),
+                    },
+                });
+
+                revalidatePath('/facilitator');
+                revalidatePath('/game');
+
+                return { success: true };
+            } catch (error) {
+                console.error('Failed to unlock bonus component:', error);
+                return { success: false, error: 'Failed to unlock bonus component' };
+            }
         }
-
-        await prisma.session.update({
-            where: { id: sessionId },
-            data: {
-                unlockedBonusCards: unlocked.join(','),
-            },
-        });
-
-        revalidatePath('/facilitator');
-        revalidatePath('/game');
-
-        return { success: true };
-    } catch (error) {
-        console.error('Failed to unlock bonus component:', error);
-        return { success: false, error: 'Failed to unlock bonus component' };
-    }
-}
