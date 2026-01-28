@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { generateSessionCode, generateRandomCardLayout } from '@/lib/bingo';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
+import { checkRateLimit } from '@/lib/rate-limiter';
 
 /**
  * Create a new session (facilitator only)
@@ -23,6 +24,15 @@ export async function createSession() {
 
         if (!participant) {
             return { success: false, error: 'User not found' };
+        }
+
+        // Rate limit check: 5 sessions per hour
+        const rateLimit = await checkRateLimit(participant.id, 'createSession');
+        if (!rateLimit.allowed) {
+            return {
+                success: false,
+                error: `Rate limit exceeded. You can create a new session in ${rateLimit.retryAfter} seconds.`,
+            };
         }
 
         const facilitatorEmail = participant.email;
@@ -191,6 +201,15 @@ export async function deleteSession(sessionId: string) {
  */
 export async function joinSession(sessionCode: string, participantId: string) {
     try {
+        // Rate limit check: 10 joins per minute
+        const rateLimit = await checkRateLimit(participantId, 'joinSession');
+        if (!rateLimit.allowed) {
+            return {
+                success: false,
+                error: `Too many join attempts. Please wait ${rateLimit.retryAfter} seconds.`,
+            };
+        }
+
         // Find the session
         const session = await prisma.session.findUnique({
             where: { code: sessionCode.toUpperCase() },
@@ -228,6 +247,22 @@ export async function joinSession(sessionCode: string, participantId: string) {
  */
 export async function unlockNextComponent(sessionId: string, componentId: string) {
     try {
+        // Get facilitator ID for rate limiting
+        const cookieStore = await cookies();
+        const sessionCookie = cookieStore.get('ai_bingo_session');
+        if (!sessionCookie) {
+            return { success: false, error: 'Not authenticated' };
+        }
+
+        // Rate limit check: 10 unlocks per minute
+        const rateLimit = await checkRateLimit(sessionCookie.value, 'unlockComponent');
+        if (!rateLimit.allowed) {
+            return {
+                success: false,
+                error: `Slow down! You can unlock more components in ${rateLimit.retryAfter} seconds.`,
+            };
+        }
+
         const session = await prisma.session.findUnique({
             where: { id: sessionId },
         });

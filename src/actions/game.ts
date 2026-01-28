@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { checkBingoLines } from '@/lib/bingo';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
+import { checkRateLimit } from '@/lib/rate-limiter';
 
 /**
  * Mark a component as complete for the current participant
@@ -16,6 +17,15 @@ export async function markComponentComplete(componentId: string) {
 
         if (!sessionCookie) {
             return { success: false, error: 'Not logged in' };
+        }
+
+        // Rate limit check: 30 completions per minute
+        const rateLimit = await checkRateLimit(sessionCookie.value, 'markComplete');
+        if (!rateLimit.allowed) {
+            return {
+                success: false,
+                error: `Slow down! You can mark more components complete in ${rateLimit.retryAfter} seconds.`,
+            };
         }
 
         const participant = await prisma.participant.findUnique({
