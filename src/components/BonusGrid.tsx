@@ -119,20 +119,18 @@ export default function BonusGrid({ participant, session }: BonusGridProps) {
                 </div>
             )}
 
-            {/* Detail Drawer for Bonus Cards */}
-            {selectedComponent && (
-                <DetailDrawer
-                    component={selectedComponent}
-                    status={
-                        participant.completedBonusCards.includes(selectedComponent.id)
-                            ? 'completed'
-                            : 'unlocked'
-                    }
-                    onClose={() => setSelectedComponent(null)}
-                    onComplete={() => handleMarkComplete(selectedComponent.id)}
-                    isCompleting={isCompleting}
-                />
-            )}
+            <DetailDrawer
+                component={selectedComponent}
+                status={
+                    participant.completedBonusCards.includes(selectedComponent.id)
+                        ? 'completed'
+                        : 'unlocked'
+                }
+                variant="bonus"
+                onClose={() => setSelectedComponent(null)}
+                onComplete={() => handleMarkComplete(selectedComponent.id)}
+                isCompleting={isCompleting}
+            />
         </div>
     );
 }

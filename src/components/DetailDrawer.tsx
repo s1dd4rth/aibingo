@@ -11,12 +11,20 @@ interface DetailDrawerProps {
   onComplete: () => void;
   status: 'locked' | 'unlocked' | 'completed';
   isCompleting?: boolean;
+  variant?: 'default' | 'bonus';
 }
 
-export default function DetailDrawer({ component, onClose, onComplete, status, isCompleting = false }: DetailDrawerProps) {
+export default function DetailDrawer({ component, onClose, onComplete, status, isCompleting = false, variant = 'default' }: DetailDrawerProps) {
   const [activeTab, setActiveTab] = useState(0);
   const { copied, copy } = useCopy();
   const isCompleted = status === 'completed';
+  const isBonus = variant === 'bonus';
+
+  // Dynamic Colors
+  const primaryText = isBonus ? 'text-[#00ff00]' : 'text-primary';
+  const primaryBg = isBonus ? 'bg-[#00ff00]' : 'bg-primary';
+  const primaryBorder = isBonus ? 'border-[#00ff00]' : 'border-primary';
+  const accentText = isBonus ? 'text-[#00ff00]' : 'text-accent'; // Reuse green for accent in bonus mode
 
   // Reset tab when component changes
   if (component && activeTab >= (component.examples?.length || 0) && activeTab !== 0) {
@@ -43,7 +51,10 @@ export default function DetailDrawer({ component, onClose, onComplete, status, i
 
         <motion.div
           layoutId={`card-${component.id}`}
-          className="relative w-full max-w-2xl bg-card border-2 border-border shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col max-h-[90vh]"
+          className={cn(
+            "relative w-full max-w-2xl bg-card border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col max-h-[90vh]",
+            isBonus ? "border-[#00ff00]" : "border-border"
+          )}
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -53,7 +64,7 @@ export default function DetailDrawer({ component, onClose, onComplete, status, i
               <div>
                 <div className="flex gap-2 mb-2 font-mono uppercase text-xs">
                   <span className="font-bold px-2 py-1 border border-border bg-background text-muted-foreground">{component.period}</span>
-                  <span className="font-bold px-2 py-1 border border-primary bg-primary/10 text-primary">{component.family}</span>
+                  <span className={cn("font-bold px-2 py-1 border bg-opacity-10", primaryBorder, primaryBg, primaryText)}>{component.family}</span>
                 </div>
                 <h2 className="text-3xl font-bold text-foreground font-sans uppercase tracking-tight">{component.name}</h2>
               </div>
@@ -66,14 +77,14 @@ export default function DetailDrawer({ component, onClose, onComplete, status, i
           <div className="p-6 space-y-8 overflow-y-auto">
             <div>
               <h3 className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-2 font-mono">:: SYSTEM_DESCRIPTION</h3>
-              <p className="text-foreground leading-relaxed text-lg border-l-4 border-primary/50 pl-4">{component.description}</p>
+              <p className={cn("text-foreground leading-relaxed text-lg border-l-4 pl-4", isBonus ? "border-[#00ff00]/50" : "border-primary/50")}>{component.description}</p>
             </div>
 
             {(component.why || component.what || component.how) && (
               <div className="grid gap-4 sm:grid-cols-3">
                 {component.why && (
                   <div className="bg-background p-4 border border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)]">
-                    <div className="flex items-center gap-2 text-primary font-bold mb-2 uppercase text-sm font-mono">
+                    <div className={cn("flex items-center gap-2 font-bold mb-2 uppercase text-sm font-mono", primaryText)}>
                       <Lightbulb className="w-4 h-4" /> Why?
                     </div>
                     <p className="text-sm text-muted-foreground leading-relaxed">{component.why}</p>
@@ -81,7 +92,7 @@ export default function DetailDrawer({ component, onClose, onComplete, status, i
                 )}
                 {component.what && (
                   <div className="bg-background p-4 border border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)]">
-                    <div className="flex items-center gap-2 text-accent font-bold mb-2 uppercase text-sm font-mono">
+                    <div className={cn("flex items-center gap-2 font-bold mb-2 uppercase text-sm font-mono", accentText)}>
                       <BookOpen className="w-4 h-4" /> What?
                     </div>
                     <p className="text-sm text-muted-foreground leading-relaxed">{component.what}</p>
@@ -110,7 +121,7 @@ export default function DetailDrawer({ component, onClose, onComplete, status, i
                           className={cn(
                             "px-4 py-2 text-xs font-bold font-mono uppercase transition-all border-t border-l border-r border-transparent",
                             activeTab === idx
-                              ? "bg-background border-border border-b-background -mb-[1px] text-primary"
+                              ? `bg-background border-border border-b-background -mb-[1px] ${primaryText}`
                               : "text-muted-foreground hover:bg-muted/20"
                           )}
                         >
@@ -135,7 +146,7 @@ export default function DetailDrawer({ component, onClose, onComplete, status, i
                   {component.examples ? (
                     <div className="space-y-4">
                       {component.examples[activeTab].description && (
-                        <p className="text-xs text-muted-foreground italic border-l-2 border-accent pl-3">
+                        <p className={cn("text-xs italic border-l-2 pl-3", isBonus ? "text-[#00ff00] border-[#00ff00]" : "text-muted-foreground border-accent")}>
                           {`// ${component.examples[activeTab].description}`}
                         </p>
                       )}
@@ -153,7 +164,7 @@ export default function DetailDrawer({ component, onClose, onComplete, status, i
             )}
 
             <div>
-              <h4 className="flex items-center gap-2 font-bold text-accent mb-2 uppercase font-mono text-sm">
+              <h4 className={cn("flex items-center gap-2 font-bold mb-2 uppercase font-mono text-sm", accentText)}>
                 <ExternalLink className="w-4 h-4" /> Learning_Resource
               </h4>
               {component.docUrl ? (
@@ -161,7 +172,12 @@ export default function DetailDrawer({ component, onClose, onComplete, status, i
                   href={component.docUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-accent/10 hover:bg-accent/20 text-accent px-4 py-2 border border-accent/50 font-bold uppercase text-xs transition-colors"
+                  className={cn(
+                    "inline-flex items-center gap-2 px-4 py-2 border font-bold uppercase text-xs transition-colors",
+                    isBonus
+                      ? "bg-[#00ff00]/10 hover:bg-[#00ff00]/20 text-[#00ff00] border-[#00ff00]/50"
+                      : "bg-accent/10 hover:bg-accent/20 text-accent border-accent/50"
+                  )}
                 >
                   <BookOpen className="w-4 h-4" />
                   ACCESS_DOCUMENTATION
@@ -175,7 +191,12 @@ export default function DetailDrawer({ component, onClose, onComplete, status, i
 
           <div className="p-6 border-t-2 border-border bg-muted/10">
             {isCompleted ? (
-              <div className="w-full bg-green-500/10 text-green-500 font-bold py-4 border border-green-500 flex items-center justify-center gap-2 uppercase tracking-wide">
+              <div className={cn(
+                "w-full font-bold py-4 border flex items-center justify-center gap-2 uppercase tracking-wide",
+                isBonus
+                  ? "bg-[#00ff00]/10 text-[#00ff00] border-[#00ff00]"
+                  : "bg-green-500/10 text-green-500 border-green-500"
+              )}>
                 <CheckCircle className="w-5 h-5" /> Module_Verified
               </div>
             ) : (
@@ -185,7 +206,7 @@ export default function DetailDrawer({ component, onClose, onComplete, status, i
                 className={cn(
                   "w-full py-4 font-bold flex items-center justify-center gap-2 transition-all uppercase tracking-wide border-2",
                   {
-                    'bg-primary text-primary-foreground border-primary hover:translate-x-[2px] hover:translate-y-[2px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px]': status === 'unlocked',
+                    [`${primaryBg} text-white ${primaryBorder} hover:translate-x-[2px] hover:translate-y-[2px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px]`]: status === 'unlocked',
                     'bg-muted text-muted-foreground border-border cursor-not-allowed opacity-50': status === 'locked',
                   }
                 )}
