@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { BONUS_COMPONENTS, GameComponent } from '@/lib/game-config';
 import { markComponentComplete } from '@/actions/game';
 import DetailDrawer from './DetailDrawer';
+import BingoCard from './BingoCard';
 
 interface BonusGridProps {
     participant: {
@@ -78,44 +79,25 @@ export default function BonusGrid({ participant, session }: BonusGridProps) {
 
             {/* Bonus Grid (4 cols x 2 rows) - Only show when unlocked */}
             {bonusUnlocked && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {BONUS_COMPONENTS.map((component) => {
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                    {BONUS_COMPONENTS.map((component, index) => {
                         const isUnlocked = session.unlockedBonusCards.includes(component.id);
                         const isCompleted = participant.completedBonusCards.includes(component.id);
 
+                        // Map to standard status
+                        const status = isCompleted ? 'completed' : isUnlocked ? 'unlocked' : 'locked';
+
                         return (
-                            <button
+                            <BingoCard
                                 key={component.id}
-                                onClick={() => isUnlocked && !isCompleted && setSelectedComponent(component)}
-                                disabled={!isUnlocked || isCompleted}
-                                className={`
-                                    relative p-4 border-2 font-mono text-left transition-all group
-                                    ${isCompleted
-                                        ? 'border-[#00ff00] bg-[#00ff00]/20 text-[#00ff00]'
-                                        : isUnlocked
-                                            ? 'border-[#00ff00] bg-black hover:bg-[#00ff00]/10 text-white cursor-pointer'
-                                            : 'border-gray-600 bg-black/50 text-gray-500 cursor-not-allowed'
-                                    }
-                                `}
-                            >
-                                {/* Status Icon */}
-                                <div className="absolute top-2 right-2 text-lg">
-                                    {isCompleted ? '✓' : isUnlocked ? '🎁' : '🔒'}
-                                </div>
-
-                                {/* Component Name */}
-                                <div className="text-xs font-bold mb-1">{component.name}</div>
-
-                                {/* Description */}
-                                <div className="text-[10px] opacity-70 line-clamp-2 group-hover:opacity-100 transition-opacity">
-                                    {component.description}
-                                </div>
-
-                                {/* Points */}
-                                <div className="mt-2 text-[10px] font-bold text-[#00ff00]">
-                                    +{component.bonusPoints} PTS
-                                </div>
-                            </button>
+                                component={component}
+                                status={status}
+                                variant="bonus"
+                                index={index}
+                                onUnlock={() => setSelectedComponent(component)}
+                                onComplete={() => setSelectedComponent(component)} // Same action: open drawer
+                                aria-label={`Bonus card for ${component.name}, status: ${status}`}
+                            />
                         );
                     })}
                 </div>
