@@ -191,6 +191,22 @@ export async function deleteSession(sessionId: string) {
             return { success: false, error: 'Unauthorized to delete this session' };
         }
 
+        // Explicitly clear all participant data associated with this session before deleting it
+        // This ensures users don't see "ghost" connections (like old passcodes) upon next login
+        await prisma.participant.updateMany({
+            where: { sessionId: sessionId },
+            data: {
+                sessionId: null,
+                passcode: '',
+                cardLayout: '',
+                completedComponents: '',
+                completedBonusCards: '',
+                bingoLines: 0,
+                bonusPoints: 0,
+                achievements: '',
+            },
+        });
+
         await prisma.session.delete({
             where: { id: sessionId },
         });
