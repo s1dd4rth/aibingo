@@ -6,6 +6,7 @@ import { Trophy, ArrowLeft, CheckCircle2, MonitorPlay, Maximize2, Minimize2 } fr
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import BrandHeader from './BrandHeader';
 
 export default function LeaderboardView({ initialData }: { initialData: LeaderboardData }) {
     const [data, setData] = useState(initialData);
@@ -30,8 +31,22 @@ export default function LeaderboardView({ initialData }: { initialData: Leaderbo
             <div className={cn("w-full relative z-10 transition-all duration-500", isPresenter ? "max-w-7xl" : "max-w-4xl mx-auto space-y-8")}>
 
                 {/* Header */}
-                <div className="flex items-center justify-between mb-8 pb-8 border-b border-border">
-                    {!isPresenter && (
+                <BrandHeader
+                    title={sessionCode ? `SESSION: ${sessionCode}` : 'GLOBAL_LEADERBOARD'}
+                    className="mb-8 p-0 border-b-0 bg-transparent relative z-20"
+                    rightElement={
+                        <button
+                            onClick={() => setIsPresenter(!isPresenter)}
+                            className="schematic-btn px-4 py-2 flex items-center gap-2 text-xs"
+                        >
+                            {isPresenter ? <Minimize2 className="w-4 h-4" /> : <MonitorPlay className="w-4 h-4" />}
+                            {isPresenter ? "TERM_VIEW" : "PRESENTER_MODE"}
+                        </button>
+                    }
+                />
+
+                {!isPresenter && (
+                    <div className="mb-8">
                         <Link
                             href="/game"
                             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors group font-mono uppercase text-sm"
@@ -39,28 +54,8 @@ export default function LeaderboardView({ initialData }: { initialData: Leaderbo
                             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                             [RETURN_TO_GRID]
                         </Link>
-                    )}
-
-                    <div className={cn("flex flex-col items-center gap-1", isPresenter && "mx-auto scale-125 mb-16")}>
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-primary/10 border border-primary">
-                                <Trophy className="w-6 h-6 text-primary" />
-                            </div>
-                            <h1 className="text-3xl font-bold uppercase tracking-tighter text-foreground">
-                                {sessionCode ? `SESSION_ID: ${sessionCode}` : 'GLOBAL_LEADERBOARD'}
-                            </h1>
-                        </div>
-                        {isPresenter && <div className="text-accent text-sm tracking-[0.3em] uppercase font-bold mt-2 animate-pulse">● LIVE_FEED_ACTIVE</div>}
                     </div>
-
-                    <button
-                        onClick={() => setIsPresenter(!isPresenter)}
-                        className="schematic-btn px-4 py-2 flex items-center gap-2 text-xs"
-                    >
-                        {isPresenter ? <Minimize2 className="w-4 h-4" /> : <MonitorPlay className="w-4 h-4" />}
-                        {isPresenter ? "TERM_VIEW" : "PRESENTER_MODE"}
-                    </button>
-                </div>
+                )}
 
                 {/* Presenter Instructions */}
                 {isPresenter && sessionCode && (

@@ -3,6 +3,7 @@ import ColabSetup from '@/components/ColabSetup';
 import { getGameState } from '@/actions/game';
 import BingoGrid from '@/components/BingoGrid';
 import BonusGrid from '@/components/BonusGrid';
+import BrandHeader from '@/components/BrandHeader';
 import { redirect } from 'next/navigation';
 
 export default async function GamePage() {
@@ -15,8 +16,13 @@ export default async function GamePage() {
 
     return (
         <div className="space-y-8">
-            <div className="text-center space-y-2">
-                <h1 className="text-4xl md:text-5xl font-bold text-white">Your Learning Path</h1>
+            <BrandHeader
+                title="Your Learning Path"
+                rightElement={null} // Session disconnect is inside SessionJoin for now, can move later if needed
+            />
+
+            <div className="text-center space-y-2 pt-4">
+                {/* Header Title moved to BrandHeader */}
                 <p className="text-gray-400 max-w-2xl mx-auto">
                     {state.session
                         ? "Complete components as they're unlocked by your facilitator"

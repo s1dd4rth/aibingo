@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createSession, unlockNextComponent, getFacilitatorSession, deleteSession, toggleBonusCards, unlockBonusComponent } from '@/actions/session';
 import { GAME_COMPONENTS, BONUS_COMPONENTS } from '@/lib/game-config';
+import BrandHeader from '@/components/BrandHeader';
 import { Trophy, Users, Unlock, CheckCircle2, Lock, Star } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from "@/lib/utils";
@@ -248,14 +249,10 @@ export default function FacilitatorPage() {
     const nextToUnlock = activeComponents.find(c => !unlockedSet.has(c.id));
 
     return (
-        <div className="min-h-screen bg-background text-foreground p-8 font-sans relative">
-            <div className="max-w-6xl mx-auto space-y-8">
-                {/* Header */}
-                <div className="flex items-center justify-between border-b border-border pb-8">
-                    <div>
-                        <h1 className="text-4xl font-bold uppercase tracking-tighter">Facilitator_Control</h1>
-                        <p className="text-muted-foreground mt-2 font-mono text-xs uppercase">{`// SESSION_MANAGEMENT_INTERFACE`}</p>
-                    </div>
+        <div className="min-h-screen bg-background text-foreground font-sans relative">
+            <BrandHeader
+                title="FACILITATOR_CONTROL"
+                rightElement={
                     <div className="flex items-center gap-3">
                         <Link
                             href="/leaderboard"
@@ -271,7 +268,10 @@ export default function FacilitatorPage() {
                             TERMINATE_SESSION
                         </button>
                     </div>
-                </div>
+                }
+            />
+
+            <div className="p-8 max-w-6xl mx-auto space-y-8">
 
                 {/* Session Info */}
                 <div className="schematic-card p-6 bg-card">
