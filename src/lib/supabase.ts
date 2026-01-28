@@ -37,7 +37,6 @@ export function subscribeToSession(
             {
                 event: '*',
                 schema: 'public',
-                table: 'Session',
                 filter: `id=eq.${sessionId}`,
             },
             onUpdate
@@ -65,7 +64,6 @@ export function subscribeToParticipants(
             {
                 event: '*',
                 schema: 'public',
-                table: 'Participant',
                 filter: `sessionId=eq.${sessionId}`,
             },
             onUpdate
@@ -93,7 +91,6 @@ export function subscribeToFacilitatorSessions(
             {
                 event: '*',
                 schema: 'public',
-                table: 'Session',
                 filter: `facilitatorEmail=eq.${facilitatorEmail}`,
             },
             onUpdate
