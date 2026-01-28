@@ -393,3 +393,84 @@ export async function getCurrentSession() {
         return { error: 'Failed to load session' };
     }
 }
+
+/**
+ * Toggle bonus cards for the entire session (facilitator only)
+ */
+export async function toggleBonusCards(sessionId: string, enabled: boolean) {
+    try {
+        const cookieStore = await cookies();
+        const sessionCookie = cookieStore.get('ai_bingo_session');
+        if (!sessionCookie) return { success: false, error: 'Not authenticated' };
+
+        const participant = await prisma.participant.findUnique({
+            where: { id: sessionCookie.value }
+        });
+        if (!participant) return { success: false, error: 'User not found' };
+
+        // Verify ownership
+        const session = await prisma.session.findUnique({ where: { id: sessionId } });
+        if (!session || session.facilitatorEmail !== participant.email) {
+            return { success: false, error: 'Unauthorized' };
+        }
+
+        await prisma.session.update({
+            where: { id: sessionId },
+            data: { bonusEnabled: enabled }
+        });
+
+        revalidatePath('/facilitator');
+        revalidatePath('/game');
+
+        return { success: true, bonusEnabled: enabled };
+    } catch (error) {
+        console.error('Failed to toggle bonus cards:', error);
+        return { success: false, error: 'Failed to toggle bonus cards' };
+    }
+}
+
+/**
+ * Unlock a specific bonus component (facilitator only)
+ */
+export async function unlockBonusComponent(sessionId: string, componentId: string) {
+    try {
+        const cookieStore = await cookies();
+        const sessionCookie = cookieStore.get('ai_bingo_session');
+        if (!sessionCookie) return { success: false, error: 'Not authenticated' };
+
+        const participant = await prisma.participant.findUnique({
+            where: { id: sessionCookie.value }
+        });
+        if (!participant) return { success: false, error: 'User not found' };
+
+        // Verify ownership
+        const session = await prisma.session.findUnique({ where: { id: sessionId } });
+        if (!session || session.facilitatorEmail !== participant.email) {
+            return { success: false, error: 'Unauthorized' };
+        }
+
+        // Add to unlocked bonus cards
+        const unlocked = session.unlockedBonusCards
+            ? session.unlockedBonusCards.split(',').filter(Boolean)
+            : [];
+
+        if (!unlocked.includes(componentId)) {
+            unlocked.push(componentId);
+        }
+
+        await prisma.session.update({
+            where: { id: sessionId },
+            data: {
+                unlockedBonusCards: unlocked.join(','),
+            },
+        });
+
+        revalidatePath('/facilitator');
+        revalidatePath('/game');
+
+        return { success: true };
+    } catch (error) {
+        console.error('Failed to unlock bonus component:', error);
+        return { success: false, error: 'Failed to unlock bonus component' };
+    }
+}

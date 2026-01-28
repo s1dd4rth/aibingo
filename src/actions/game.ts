@@ -37,7 +37,46 @@ export async function markComponentComplete(componentId: string) {
             return { success: false, error: 'Participant not found' };
         }
 
-        // Get current completed components
+        // Import component config to check tier
+        const { ALL_COMPONENTS } = await import('@/lib/game-config');
+        const component = ALL_COMPONENTS.find(c => c.id === componentId);
+
+        if (!component) {
+            return { success: false, error: 'Invalid component' };
+        }
+
+        // Handle bonus cards separately
+        if (component.tier === 'bonus') {
+            const completedBonus = participant.completedBonusCards
+                ? participant.completedBonusCards.split(',')
+                : [];
+
+            if (!completedBonus.includes(componentId)) {
+                completedBonus.push(componentId);
+            }
+
+            const newBonusPoints = participant.bonusPoints + (component.bonusPoints || 0);
+
+            await prisma.participant.update({
+                where: { id: participant.id },
+                data: {
+                    completedBonusCards: completedBonus.join(','),
+                    bonusPoints: newBonusPoints,
+                },
+            });
+
+            revalidatePath('/game');
+            revalidatePath('/leaderboard');
+
+            return {
+                success: true,
+                bonusPoints: newBonusPoints,
+                completedBonusCount: completedBonus.length,
+                message: `+${component.bonusPoints} bonus points!`,
+            };
+        }
+
+        // Core component completion (existing logic)
         const completed = participant.completedComponents
             ? participant.completedComponents.split(',')
             : [];

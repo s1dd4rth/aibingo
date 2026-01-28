@@ -1,9 +1,6 @@
 export type ComponentCategory = 'Basics' | 'Combos' | 'Production' | 'Future';
-export type ComponentMaturity = 'Basics' | 'Combos' | 'Production' | 'Future'; // Seems redundant in PRD, mapping Category to Period roughly?
-// PRD Columns: Component Name, Period (Maturity), Category (Family), Description
-// Actually Category in PRD is: Actions, Memory, Blueprint, Safety, Brains.
-// Period is: Basics, Combos, Production, Future.
-
+export type ComponentMaturity = 'Basics' | 'Combos' | 'Production' | 'Future';
+export type ComponentTier = 'core' | 'bonus'; // Core game vs bonus challenges
 export type ComponentFamily = 'Actions' | 'Memory' | 'Blueprint' | 'Safety' | 'Brains';
 
 export interface GameComponent {
@@ -11,12 +8,14 @@ export interface GameComponent {
     name: string;
     period: ComponentMaturity;
     family: ComponentFamily;
+    tier: ComponentTier; // Whether this is a core or bonus component
     description: string;
     docUrl?: string;
     why?: string;
     what?: string;
     how?: string;
     codeSnippet?: string;
+    bonusPoints?: number; // Points awarded for completing bonus cards
     examples?: {
         title: string;
         description?: string;
@@ -30,6 +29,7 @@ export const GAME_COMPONENTS: GameComponent[] = [
         id: 'prompting',
         name: 'Prompting',
         period: 'Basics',
+        tier: 'core',
         family: 'Actions',
         description: 'The atomic unit of interaction (instructions).',
         docUrl: 'https://ai.google.dev/gemini-api/docs/prompting-intro',
@@ -100,6 +100,7 @@ print(response.text)`
         id: 'embeddings',
         name: 'Embeddings',
         period: 'Basics',
+        tier: 'core',
         family: 'Memory',
         description: 'Converting text to numbers (vectors).',
         docUrl: 'https://ai.google.dev/gemini-api/docs/embeddings',
@@ -124,6 +125,7 @@ print(f"First 5 numbers: {result.embeddings[0].values[:5]}")`
         id: 'chains',
         name: 'Chains',
         period: 'Basics',
+        tier: 'core',
         family: 'Blueprint',
         description: 'Simple linear sequences (A → B).',
         docUrl: 'https://ai.google.dev/gemini-api/docs/prompting-strategies',
@@ -150,6 +152,7 @@ print(f"Haiku:\\n{response2.text}")`
         id: 'rules-regex',
         name: 'Rules & Regex',
         period: 'Basics',
+        tier: 'core',
         family: 'Safety',
         description: 'Basic deterministic keyword filters.',
         docUrl: 'https://ai.google.dev/gemini-api/docs/safety-settings',
@@ -176,6 +179,7 @@ else:
         id: 'llms',
         name: 'LLMs',
         period: 'Basics',
+        tier: 'core',
         family: 'Brains',
         description: 'The raw intelligence engine.',
         docUrl: 'https://ai.google.dev/gemini-api/docs/models/gemini',
@@ -205,6 +209,7 @@ print(response.text)`
         id: 'function-calling',
         name: 'Function Calling',
         period: 'Combos',
+        tier: 'core',
         family: 'Actions',
         description: 'LLMs calling external tools.',
         docUrl: 'https://ai.google.dev/gemini-api/docs/function-calling',
@@ -235,6 +240,7 @@ print(f"Answer: {response.text}")`
         id: 'vector-db',
         name: 'Vector DB',
         period: 'Combos',
+        tier: 'core',
         family: 'Memory',
         description: 'Storing and searching embeddings.',
         docUrl: 'https://ai.google.dev/gemini-api/docs/embeddings',
@@ -261,6 +267,7 @@ print(f"Answer found: {best_match}")`
         id: 'rag',
         name: 'RAG',
         period: 'Combos',
+        tier: 'core',
         family: 'Blueprint',
         description: 'Retrieval Augmented Generation.',
         docUrl: 'https://ai.google.dev/gemini-api/tutorials/document_search',
@@ -288,6 +295,7 @@ print(response.text)`
         id: 'guardrails',
         name: 'Guardrails',
         period: 'Combos',
+        tier: 'core',
         family: 'Safety',
         description: 'Validators to ensure output quality.',
         docUrl: 'https://ai.google.dev/gemini-api/docs/safety-settings',
@@ -319,6 +327,7 @@ else:
         id: 'multimodal',
         name: 'Multimodal',
         period: 'Combos',
+        tier: 'core',
         family: 'Brains',
         description: 'Models that see, hear, and speak.',
         docUrl: 'https://ai.google.dev/gemini-api/docs/vision',
@@ -387,6 +396,7 @@ for modality, prompt, media in prompts:
         id: 'evaluator',
         name: 'Evaluator',
         period: 'Combos',
+        tier: 'core',
         family: 'Safety',
         description: 'Automated quality checks for model outputs.',
         docUrl: 'https://ai.google.dev/gemini-api/docs/prompting-strategies',
@@ -422,6 +432,7 @@ print(response.text)`
         id: 'agents',
         name: 'Agents',
         period: 'Production',
+        tier: 'core',
         family: 'Actions',
         description: '"Think, Act, Observe" loops.',
         docUrl: 'https://ai.google.dev/gemini-api/docs/function-calling',
@@ -463,6 +474,7 @@ print(f"Agent Reasoning (LLM): {llm_response}")
         id: 'fine-tuning',
         name: 'Fine-tuning',
         period: 'Production',
+        tier: 'core',
         family: 'Memory',
         description: 'Baking knowledge into model weights.',
         docUrl: 'https://ai.google.dev/gemini-api/docs/model-tuning',
@@ -526,6 +538,7 @@ else:
         id: 'frameworks',
         name: 'Frameworks',
         period: 'Production',
+        tier: 'core',
         family: 'Blueprint',
         description: 'Tools like LangChain to tie it together.',
         docUrl: 'https://ai.google.dev/gemini-api/docs/langchain',
@@ -576,6 +589,7 @@ except Exception as e:
         id: 'red-teaming',
         name: 'Red Teaming',
         period: 'Production',
+        tier: 'core',
         family: 'Safety',
         description: 'Adversarial testing for vulnerabilities.',
         docUrl: 'https://ai.google.dev/responsibility/safety',
@@ -625,6 +639,7 @@ for prompt in attacks:
         id: 'small-models',
         name: 'Small Models',
         period: 'Production',
+        tier: 'core',
         family: 'Brains',
         description: 'Distilled, specialized, and efficient models.',
         docUrl: 'https://ai.google.dev/gemma',
@@ -674,6 +689,7 @@ else:
         id: 'multi-agent',
         name: 'Multi-Agent',
         period: 'Future',
+        tier: 'core',
         family: 'Actions',
         description: 'Multiple agents collaborating or debating.',
         docUrl: 'https://ai.google.dev/gemini-api/docs',
@@ -725,6 +741,7 @@ for i in range(4):
         id: 'synthetic-data',
         name: 'Synthetic Data',
         period: 'Future',
+        tier: 'core',
         family: 'Memory',
         description: 'Generating training data using AI.',
         docUrl: 'https://ai.google.dev/gemini-api/docs/prompting-strategies',
@@ -770,6 +787,7 @@ except Exception as e:
         id: 'flow-engineering',
         name: 'Flow Engineering',
         period: 'Future',
+        tier: 'core',
         family: 'Blueprint',
         description: 'Programmatic, self-optimizing prompt flows.',
         docUrl: 'https://ai.google.dev/gemini-api/docs/prompting-strategies',
@@ -817,6 +835,7 @@ solve_math_problem("What is (1234 * 5678) + 90?")`
         id: 'interpretability',
         name: 'Interpretability',
         period: 'Future',
+        tier: 'core',
         family: 'Safety',
         description: 'Mapping specific neurons to concepts.',
         docUrl: 'https://ai.google.dev/gemini-api/docs/grounding',
@@ -868,6 +887,7 @@ else:
         id: 'thinking-models',
         name: 'Thinking Models',
         period: 'Future',
+        tier: 'core',
         family: 'Brains',
         description: 'Models that reason (Chain of Thought) first.',
         docUrl: 'https://ai.google.dev/gemini-api/docs/thinking',
@@ -914,3 +934,388 @@ print("\\n✨ See how the model 'simulated' the scenario before answering?")`
 
     },
 ];
+
+// === BONUS COMPONENTS (2026 TRENDS) ===
+// These are advanced challenges unlocked after core progress
+
+export const BONUS_COMPONENTS_2026: GameComponent[] = [
+    {
+        id: 'ralph-wiggum-loops',
+        name: 'Ralph Wiggum Loops',
+        period: 'Future',
+        tier: 'bonus',
+        family: 'Actions',
+        bonusPoints: 50,
+        description: 'Persistent agent loops that run autonomously until task completion ("all-in-AFK" pattern).',
+        why: 'For complex tasks that require hours of iteration, you can give an agent a goal and walk away while it loops through testing, debugging, and refining.',
+        what: 'A pattern where agents continuously execute think→act→observe cycles without human intervention until a task is fully complete.',
+        how: 'Configure agents with clear success criteria, enable automatic tool calling, and let them run in persistent loops with checkpoints and error recovery.',
+        codeSnippet: `# Ralph Wiggum Loop Pattern
+# Agent runs autonomously until all tests pass
+
+task = "Build a complete RESTful API with authentication"
+success_criteria = "All unit tests pass AND integration tests pass"
+
+while not meets_criteria(success_criteria):
+    # Think: Analyze current state
+    analysis = agent.analyze_codebase()
+    
+    # Act: Make improvements
+    agent.write_code(analysis.next_steps)
+    
+    # Observe: Run tests
+    test_results = agent.run_tests()
+    
+    if test_results.failed:
+        agent.debug(test_results.errors)
+    
+    # Save checkpoint every iteration
+    agent.save_state()
+
+print("Task complete! Agent ran for", agent.iterations, "cycles")`
+    },
+    {
+        id: 'agent-skills',
+        name: 'Agent Skills',
+        period: 'Production',
+        tier: 'bonus',
+        family: 'Blueprint',
+        bonusPoints: 50,
+        description: 'Port able packages (SKILL.md + scripts) that extend agent capabilities with reusable expertise.',
+        why: 'Instead of re-prompting best practices every time, you install "knowledge packs" that automatically guide agents to follow proven patterns.',
+        what: 'Structured folders containing a SKILL.md file (natural language instructions), optional helper scripts, and references that agents can load and execute.',
+        how: 'Use the Agent Skills CLI to install skills from community repositories. The agent reads the SKILL.md and applies those rules to its decision-making process.',
+        codeSnippet: `# Install a skill (e.g., React best practices)
+npx add-skill vercel-labs/react-best-practices
+
+# Your agent now automatically:
+# - Eliminates async waterfalls
+# - Reduces bundle size
+# - Optimizes re-renders
+# - Follows 40+ curated performance rules
+
+# Create your own skill
+mkdir my-custom-skill
+cat > my-custom-skill/SKILL.md << 'SKILL'
+---
+name: "API Security Checklist"
+description: "Enforces OWASP API security standards"
+---
+
+# Rules
+1. Always validate input with schemas (Zod/Joi)
+2. Use rate limiting on all endpoints
+3. Implement JWT with short expiry
+4. Never log sensitive data
+SKILL
+
+# Agent now applies these rules automatically`
+    },
+    {
+        id: 'orchestration',
+        name: 'Orchestration',
+        period: 'Future',
+        tier: 'bonus',
+        family: 'Blueprint',
+        bonusPoints: 50,
+        description: 'Tools that manage fleets of autonomous agents working in parallel (e.g., Conductor, Vibe Kanban).',
+        why: 'Moving from "1 developer + 1 agent" to "1 developer + 10 agents" requires coordination systems to manage multiple concurrent workflows.',
+        what: 'Platforms that let you spin up multiple isolated agents, assign them different tasks, and review/merge their work from a central dashboard.',
+        how: 'Use orchestrators like Conductor or Vibe Kanban to create isolated Git worktrees for each agent, preventing conflicts while enabling parallel development.',
+        codeSnippet: `# Conductor: Parallel Agent Orchestration
+# Spin up 5 agents, each building a different feature
+
+from conductor import Conductor
+
+conductor = Conductor("my-repo")
+
+# Create 5 parallel agents
+agents = [
+    conductor.create_agent("auth-system", branch="feat/auth"),
+    conductor.create_agent("payment-api", branch="feat/payments"),
+    conductor.create_agent("notification", branch="feat/notif"),
+    conductor.create_agent("dashboard-ui", branch="feat/dashboard"),
+    conductor.create_agent("analytics", branch="feat/analytics"),
+]
+
+# Each runs in isolated Git worktree
+# Monitor progress
+conductor.dashboard()  # Shows status of all agents
+
+# Review and merge
+for agent in agents:
+    if agent.status == "complete":
+        diff = agent.get_diff()
+        if approve(diff):
+            conductor.merge(agent.branch)`
+    },
+    {
+        id: 'sub-agents',
+        name: 'Sub-Agents',
+        period: 'Future',
+        tier: 'bonus',
+        family: 'Actions',
+        bonusPoints: 50,
+        description: 'Specialized AI instances with custom prompts, tools, and permissions for specific subtasks.',
+        why: 'Instead of one agent doing everything poorly, you delegate to specialists (Coder, Reviewer, Security Auditor) who excel in their domain.',
+        what: 'Modular agents with focused roles that operate in their own context windows and communicate via a primary orchestrator.',
+        how: 'Define sub-agents with specific system prompts and tool access. The main agent delegates tasks and coordinates results.',
+        codeSnippet: `# Sub-Agent Pattern
+class CodeReviewer:
+    def __init__(self):
+        self.system_prompt = "You are a senior code reviewer. Focus on security, performance, and maintainability."
+        self.tools = ["lint", "static_analysis", "security_scan"]
+    
+    def review(self, code):
+        issues = self.analyze(code)
+        return {"approved": len(issues) == 0, "issues": issues}
+
+class Coder:
+    def __init__(self):
+        self.system_prompt = "You are a backend developer. Write clean, tested code."
+        self.tools = ["write_file", "run_tests"]
+    
+    def implement(self, spec):
+        code = self.generate_code(spec)
+        tests = self.write_tests(code)
+        return {"code": code, "tests": tests}
+
+# Main orchestrator
+def build_feature(spec):
+    coder = Coder()
+    reviewer = CodeReviewer()
+    
+    # Coder implements
+    result = coder.implement(spec)
+    
+    # Reviewer checks
+    review = reviewer.review(result["code"])
+    
+    if not review["approved"]:
+        # Send back to coder
+        result = coder.fix(review["issues"])
+    
+    return result`
+    },
+    {
+        id: 'context-window-mgmt',
+        name: 'Context Window Management',
+        period: 'Production',
+        tier: 'bonus',
+        family: 'Memory',
+        bonusPoints: 50,
+        description: 'Strategies for managing agent memory limits using worktrees, state snapshots, and context compression.',
+        why: 'Long-running agents hit context window limits. Git worktrees and state snapshots enable multi-hour tasks by saving/restoring context.',
+        what: 'Techniques to persist agent state across sessions, compress conversation history, and resume work without losing progress.',
+        how: 'Use Git commits as memory checkpoints, store compressed summaries of past work, and load relevant context just-in-time.',
+        codeSnippet: `# Context Management for Long Tasks
+import git
+
+class ContextManager:
+    def __init__(self, repo_path):
+        self.repo = git.Repo(repo_path)
+        self.max_tokens = 100_000
+        self.checkpoints = []
+    
+    def save_checkpoint(self, agent_state):
+        # Commit current work
+        commit = self.repo.index.commit(f"Checkpoint: {agent_state.task}")
+        
+        # Save compressed summary
+        summary = agent_state.compress_history()
+        self.checkpoints.append({
+            "commit": commit.hexsha,
+            "summary": summary,
+            "timestamp": commit.authored_datetime
+        })
+    
+    def resume_from_checkpoint(self, checkpoint_id):
+        # Load state from Git
+        self.repo.git.checkout(checkpoint_id)
+        
+        # Restore compressed context
+        checkpoint = self.checkpoints[checkpoint_id]
+        return checkpoint["summary"]  # Agent continues from here
+    
+    def estimate_tokens(self, context):
+        return len(context.split()) * 1.3  # Rough estimate
+
+# Usage
+manager = ContextManager("./project")
+agent = Agent(manager.resume_from_checkpoint(last_id))
+
+for i in range(100):  # Long-running loop
+    agent.work()
+    
+    if i % 10 == 0:  # Every 10 iterations
+        manager.save_checkpoint(agent.state)`
+    },
+    {
+        id: 'agent-to-agent-comm',
+        name: 'Agent-to-Agent Communication',
+        period: 'Future',
+        tier: 'bonus',
+        family: 'Actions',
+        bonusPoints: 50,
+        description: 'Protocols for agents to pass messages, API specs, and context to each other (e.g., handoff patterns).',
+        why: 'Multi-agent systems need coordination. Agents must share results, negotiate priorities, and hand off work cleanly.',
+        what: 'Structured message formats and communication channels that let agents exchange information programmatically.',
+        how: 'Define message schemas (JSON), use message queues or pub/sub, and implement handoff protocols for task transitions.',
+        codeSnippet: `# Agent-to-Agent Messaging
+from dataclasses import dataclass
+import json
+
+@dataclass
+class AgentMessage:
+    from_agent: str
+    to_agent: str
+    message_type: str  # "request", "response", "handoff"
+    payload: dict
+
+class MessageBus:
+    def __init__(self):
+        self.channels = {}
+    
+    def send(self, message: AgentMessage):
+        channel = self.channels.get(message.to_agent, [])
+        channel.append(message)
+        self.channels[message.to_agent] = channel
+    
+    def receive(self, agent_id):
+        return self.channels.get(agent_id, [])
+
+# Usage: Backend Agent → Frontend Agent
+bus = MessageBus()
+
+# Backend finishes API
+backend_agent.complete_api()
+api_spec = backend_agent.generate_openapi_spec()
+
+# Send to Frontend
+bus.send(AgentMessage(
+    from_agent="backend",
+    to_agent="frontend",
+    message_type="handoff",
+    payload={
+        "api_spec": api_spec,
+        "endpoints": ["POST /auth", "GET /users"],
+        "base_url": "http://localhost:3000"
+    }
+))
+
+# Frontend receives and continues
+messages = bus.receive("frontend")
+for msg in messages:
+    if msg.message_type == "handoff":
+        frontend_agent.build_ui(msg.payload["api_spec"])`
+    },
+    {
+        id: 'persistent-memory',
+        name: 'Persistent Memory (Beads)',
+        period: 'Future',
+        tier: 'bonus',
+        family: 'Memory',
+        bonusPoints: 50,
+        description: 'Git-backed memory systems that let agents remember codebase structure and decisions across sessions.',
+        why: 'Traditional agents forget everything when the session ends. Persistent memory (like Beads) uses Git commits as memory snapshots.',
+        what: 'A memory layer that stores agent knowledge, past decisions, and project context in Git, enabling long-term continuity.',
+        how: 'Every agent action creates a Git commit. The agent can query past commits to recall previous work, mistakes, and user preferences.',
+        codeSnippet: `# Beads: Git-Backed Agent Memory
+class BeadsMemory:
+    def __init__(self, repo_path):
+        self.repo = git.Repo(repo_path)
+        self.memory_branch = "agent-memory"
+    
+    def remember(self, key, value):
+        # Store memory as JSON in .beads/ directory
+        memory_file = f".beads/{key}.json"
+        with open(memory_file, 'w') as f:
+            json.dump(value, f)
+        
+        # Commit to Git
+        self.repo.index.add([memory_file])
+        self.repo.index.commit(f"Remember: {key}")
+    
+    def recall(self, key):
+        # Load from Git history
+        memory_file = f".beads/{key}.json"
+        if os.path.exists(memory_file):
+            with open(memory_file) as f:
+                return json.load(f)
+        return None
+    
+    def forget(self, key):
+        # Remove from Git
+        memory_file = f".beads/{key}.json"
+        os.remove(memory_file)
+        self.repo.index.remove([memory_file])
+        self.repo.index.commit(f"Forget: {key}")
+
+# Usage
+memory = BeadsMemory("./project")
+
+# Agent learns user preferences
+memory.remember("user_style", {
+    "prefers_typescript": True,
+    "uses_tailwind": True,
+    "testing_framework": "vitest"
+})
+
+# Days later, agent recalls
+style = memory.recall("user_style")
+agent.apply_preferences(style)`
+    },
+    {
+        id: 'parallel-execution',
+        name: 'Parallel Execution',
+        period: 'Future',
+        tier: 'bonus',
+        family: 'Blueprint',
+        bonusPoints: 50,
+        description: 'Running multiple isolated agent instances concurrently without conflicts (Conductor pattern).',
+        why: 'Sequential development is slow. Running 5-10 agents in parallel (each in isolated worktrees) dramatically speeds up feature delivery.',
+        what: 'A pattern where multiple agents execute different tasks simultaneously in separate Git worktrees, preventing merge conflicts.',
+        how: 'Create isolated Git worktrees for each agent, run them concurrently, then review and merge the best implementations.',
+        codeSnippet: `# Parallel Execution with Git Worktrees
+import subprocess
+import concurrent.futures
+
+def create_worktree(branch_name, task):
+    # Create isolated workspace
+    subprocess.run(["git", "worktree", "add", f"../worktrees/{branch_name}", "-b", branch_name])
+    
+    # Run agent in that workspace
+    return run_agent_in_worktree(branch_name, task)
+
+def run_agent_in_worktree(branch, task):
+    result = subprocess.run([
+        "cd", f"../worktrees/{branch}", "&&",
+        "claude-code", "--task", task
+    ], capture_output=True)
+    return {"branch": branch, "output": result.stdout}
+
+# Define 5 parallel tasks
+tasks = [
+    ("feat/auth", "Implement JWT authentication"),
+    ("feat/payments", "Add Stripe payment integration"),
+    ("feat/search", "Build full-text search with Algolia"),
+    ("feat/notifications", "Add email and push notifications"),
+    ("feat/analytics", "Integrate Google Analytics"),
+]
+
+# Run all agents in parallel
+with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+    futures = [executor.submit(create_worktree, branch, task) for branch, task in tasks]
+    results = [f.result() for f in concurrent.futures.as_completed(futures)]
+
+# Review results
+for result in results:
+    print(f"Branch {result['branch']} completed!")
+    # Manually review diff and merge best ones`
+    },
+];
+
+// Helper Functions
+export const CORE_COMPONENTS = GAME_COMPONENTS.filter(c => c.tier === 'core');
+export const BONUS_COMPONENTS = BONUS_COMPONENTS_2026;
+export const ALL_COMPONENTS = [...GAME_COMPONENTS, ...BONUS_COMPONENTS_2026];

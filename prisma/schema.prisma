@@ -13,6 +13,8 @@ model Session {
   code                String   @unique // e.g., "1YY1LV"
   facilitatorEmail    String
   unlockedComponents  String   @default("") // Comma-separated component IDs
+  unlockedBonusCards  String   @default("") // Comma-separated bonus component IDs
+  bonusEnabled        Boolean  @default(false) // Whether bonus cards are enabled for this session
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
   
@@ -37,7 +39,10 @@ model Participant {
   
   // Progress tracking
   completedComponents   String   @default("") // Comma-separated IDs of tiles marked complete
+  completedBonusCards   String   @default("") // Comma-separated IDs of bonus cards completed
   bingoLines            Int      @default(0)  // Number of bingo lines completed
+  bonusPoints           Int      @default(0)  // Points earned from bonus cards
+  achievements          String   @default("") // Comma-separated achievement IDs
   
   // Legacy field (keeping for backward compatibility)
   unlockedComponentIds  String   @default("")
