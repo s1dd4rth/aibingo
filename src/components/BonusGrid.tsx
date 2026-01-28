@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { BONUS_COMPONENTS } from '@/lib/game-config';
+import { BONUS_COMPONENTS, GameComponent } from '@/lib/game-config';
 import { markComponentComplete } from '@/actions/game';
+import DetailDrawer from './DetailDrawer';
 
 interface BonusGridProps {
     participant: {
@@ -10,6 +11,7 @@ interface BonusGridProps {
         completedComponents: string[];
         completedBonusCards: string[];
         bonusPoints: number;
+        bingoLines: number; // Added for celebration context if needed
     };
     session: {
         id: string;
@@ -19,7 +21,8 @@ interface BonusGridProps {
 }
 
 export default function BonusGrid({ participant, session }: BonusGridProps) {
-    const [completingId, setCompletingId] = useState<string | null>(null);
+    const [selectedComponent, setSelectedComponent] = useState<GameComponent | null>(null);
+    const [isCompleting, setIsCompleting] = useState(false);
     const [message, setMessage] = useState<string | null>(null);
 
     // Check if bonus is unlocked
@@ -27,7 +30,7 @@ export default function BonusGrid({ participant, session }: BonusGridProps) {
     const bonusUnlocked = session?.bonusEnabled && coreProgress >= 10;
 
     const handleMarkComplete = async (componentId: string) => {
-        setCompletingId(componentId);
+        setIsCompleting(true);
         setMessage(null);
 
         const result = await markComponentComplete(componentId);
@@ -35,19 +38,14 @@ export default function BonusGrid({ participant, session }: BonusGridProps) {
         if (result.success && 'message' in result) {
             setMessage(result.message as string);
             setTimeout(() => setMessage(null), 3000);
+            setSelectedComponent(null); // Close drawer on success
         }
 
-        setCompletingId(null);
+        setIsCompleting(false);
     };
 
-    if (!session) {
-        return null;
-    }
-
-    // Hide entire bonus section if facilitator hasn't enabled it
-    if (!session.bonusEnabled) {
-        return null;
-    }
+    if (!session) return null;
+    if (!session.bonusEnabled) return null;
 
     return (
         <div className="mt-8 border-t-2 border-[#00ff00] pt-6">
@@ -80,19 +78,18 @@ export default function BonusGrid({ participant, session }: BonusGridProps) {
 
             {/* Bonus Grid (4 cols x 2 rows) - Only show when unlocked */}
             {bonusUnlocked && (
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {BONUS_COMPONENTS.map((component) => {
                         const isUnlocked = session.unlockedBonusCards.includes(component.id);
                         const isCompleted = participant.completedBonusCards.includes(component.id);
-                        const isProcessing = completingId === component.id;
 
                         return (
                             <button
                                 key={component.id}
-                                onClick={() => isUnlocked && !isCompleted && handleMarkComplete(component.id)}
-                                disabled={!isUnlocked || isCompleted || isProcessing}
+                                onClick={() => isUnlocked && !isCompleted && setSelectedComponent(component)}
+                                disabled={!isUnlocked || isCompleted}
                                 className={`
-                                    relative p-4 border-2 font-mono text-left transition-all
+                                    relative p-4 border-2 font-mono text-left transition-all group
                                     ${isCompleted
                                         ? 'border-[#00ff00] bg-[#00ff00]/20 text-[#00ff00]'
                                         : isUnlocked
@@ -110,7 +107,7 @@ export default function BonusGrid({ participant, session }: BonusGridProps) {
                                 <div className="text-xs font-bold mb-1">{component.name}</div>
 
                                 {/* Description */}
-                                <div className="text-[10px] opacity-70 line-clamp-2">
+                                <div className="text-[10px] opacity-70 line-clamp-2 group-hover:opacity-100 transition-opacity">
                                     {component.description}
                                 </div>
 
@@ -118,13 +115,6 @@ export default function BonusGrid({ participant, session }: BonusGridProps) {
                                 <div className="mt-2 text-[10px] font-bold text-[#00ff00]">
                                     +{component.bonusPoints} PTS
                                 </div>
-
-                                {/* Processing State */}
-                                {isProcessing && (
-                                    <div className="absolute inset-0 flex items-center justify-center bg-black/80">
-                                        <div className="animate-spin text-2xl">⚡</div>
-                                    </div>
-                                )}
                             </button>
                         );
                     })}
@@ -145,6 +135,21 @@ export default function BonusGrid({ participant, session }: BonusGridProps) {
                         )}
                     </div>
                 </div>
+            )}
+
+            {/* Detail Drawer for Bonus Cards */}
+            {selectedComponent && (
+                <DetailDrawer
+                    component={selectedComponent}
+                    status={
+                        participant.completedBonusCards.includes(selectedComponent.id)
+                            ? 'completed'
+                            : 'unlocked'
+                    }
+                    onClose={() => setSelectedComponent(null)}
+                    onComplete={() => handleMarkComplete(selectedComponent.id)}
+                    isCompleting={isCompleting}
+                />
             )}
         </div>
     );

@@ -122,6 +122,32 @@ print(f"Vector length: {len(result.embeddings[0].values)}")
 print(f"First 5 numbers: {result.embeddings[0].values[:5]}")`
     },
     {
+        id: 'context-window',
+        name: 'Context Window',
+        period: 'Basics',
+        tier: 'core',
+        family: 'Memory',
+        description: 'The working memory limit (input size).',
+        docUrl: 'https://ai.google.dev/gemini-api/docs/tokens',
+        why: "Models don't have infinite memory. They can only see what fits in their 'window'.",
+        what: "The maximum number of tokens (text parts) the model can process in a single request.",
+        how: "By managing token counts and sliding windows to ensure important information stays in view.",
+        codeSnippet: `# Prerequisite: Ensure you've run the "Quick Setup" above to init 'client'
+# Count tokens to check if we fit in the window
+text = "The quick brown fox jumps over the lazy dog." * 100
+
+# Get model info
+model_info = client.models.get(model='gemini-2.0-flash-exp')
+print(f"Model Limit: {model_info.input_token_limit} tokens")
+
+# Count tokens
+count = client.models.count_tokens(
+    model='gemini-2.0-flash-exp',
+    contents=text
+)
+print(f"Current Usage: {count.total_tokens} tokens")`
+    },
+    {
         id: 'chains',
         name: 'Chains',
         period: 'Basics',

@@ -52,6 +52,7 @@ export default async function GamePage() {
                         completedComponents: state.participant.completedComponents,
                         completedBonusCards: state.participant.completedBonusCards,
                         bonusPoints: state.participant.bonusPoints,
+                        bingoLines: state.participant.bingoLines,
                     }}
                     session={{
                         id: state.session.id,
