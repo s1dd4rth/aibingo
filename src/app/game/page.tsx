@@ -2,6 +2,7 @@ import SessionJoin from '@/components/SessionJoin';
 import ColabSetup from '@/components/ColabSetup';
 import { getGameState } from '@/actions/game';
 import BingoGrid from '@/components/BingoGrid';
+import BonusGrid from '@/components/BonusGrid';
 import { redirect } from 'next/navigation';
 
 export default async function GamePage() {
@@ -36,6 +37,23 @@ export default async function GamePage() {
                     unlockedComponents: state.session.unlockedComponents
                 } : null}
             />
+
+            {/* Bonus Cards Section */}
+            {state.session && (
+                <BonusGrid
+                    participant={{
+                        id: state.participant.id,
+                        completedComponents: state.participant.completedComponents,
+                        completedBonusCards: state.participant.completedBonusCards,
+                        bonusPoints: state.participant.bonusPoints,
+                    }}
+                    session={{
+                        id: state.session.id,
+                        unlockedBonusCards: state.session.unlockedBonusCards,
+                        bonusEnabled: state.session.bonusEnabled,
+                    }}
+                />
+            )}
         </div>
     );
 }

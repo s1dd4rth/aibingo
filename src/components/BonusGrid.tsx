@@ -1,0 +1,149 @@
+'use client';
+
+import { useState } from 'react';
+import { BONUS_COMPONENTS } from '@/lib/game-config';
+import { markComponentComplete } from '@/actions/game';
+
+interface BonusGridProps {
+    participant: {
+        id: string;
+        completedComponents: string[];
+        completedBonusCards: string[];
+        bonusPoints: number;
+    };
+    session: {
+        id: string;
+        unlockedBonusCards: string[];
+        bonusEnabled: boolean;
+    } | null;
+}
+
+export default function BonusGrid({ participant, session }: BonusGridProps) {
+    const [completingId, setCompletingId] = useState<string | null>(null);
+    const [message, setMessage] = useState<string | null>(null);
+
+    // Check if bonus is unlocked
+    const coreProgress = participant.completedComponents.length;
+    const bonusUnlocked = session?.bonusEnabled && coreProgress >= 10;
+
+    const handleMarkComplete = async (componentId: string) => {
+        setCompletingId(componentId);
+        setMessage(null);
+
+        const result = await markComponentComplete(componentId);
+
+        if (result.success && 'message' in result) {
+            setMessage(result.message as string);
+            setTimeout(() => setMessage(null), 3000);
+        }
+
+        setCompletingId(null);
+    };
+
+    if (!session) {
+        return null;
+    }
+
+    return (
+        <div className="mt-8 border-t-2 border-[#00ff00] pt-6">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="font-mono text-xl font-bold text-[#00ff00]">
+                    🎁 BONUS CHALLENGES (2026 TRENDS)
+                </h3>
+                <div className="font-mono text-sm text-[#00ff00]">
+                    {participant.bonusPoints} PTS
+                </div>
+            </div>
+
+            {/* Lock Message */}
+            {!session.bonusEnabled && (
+                <div className="p-4 border-2 border-[#ff0000] bg-black/50 font-mono text-[#ff0000]">
+                    🔒 LOCKED BY FACILITATOR
+                </div>
+            )}
+
+            {session.bonusEnabled && !bonusUnlocked && (
+                <div className="p-4 border-2 border-yellow-500 bg-black/50 font-mono text-yellow-500">
+                    ⚠️ COMPLETE 10 CORE TILES TO UNLOCK ({coreProgress}/10)
+                </div>
+            )}
+
+            {/* Success Message */}
+            {message && (
+                <div className="mb-4 p-2 border-2 border-[#00ff00] bg-[#00ff00]/10 font-mono text-[#00ff00] text-center animate-pulse">
+                    {message}
+                </div>
+            )}
+
+            {/* Bonus Grid (4 cols x 2 rows) */}
+            {bonusUnlocked && (
+                <div className="grid grid-cols-4 gap-3">
+                    {BONUS_COMPONENTS.map((component) => {
+                        const isUnlocked = session.unlockedBonusCards.includes(component.id);
+                        const isCompleted = participant.completedBonusCards.includes(component.id);
+                        const isProcessing = completingId === component.id;
+
+                        return (
+                            <button
+                                key={component.id}
+                                onClick={() => isUnlocked && !isCompleted && handleMarkComplete(component.id)}
+                                disabled={!isUnlocked || isCompleted || isProcessing}
+                                className={`
+                                    relative p-4 border-2 font-mono text-left transition-all
+                                    ${isCompleted
+                                        ? 'border-[#00ff00] bg-[#00ff00]/20 text-[#00ff00]'
+                                        : isUnlocked
+                                            ? 'border-[#00ff00] bg-black hover:bg-[#00ff00]/10 text-white cursor-pointer'
+                                            : 'border-gray-600 bg-black/50 text-gray-500 cursor-not-allowed'
+                                    }
+                                `}
+                            >
+                                {/* Status Icon */}
+                                <div className="absolute top-2 right-2 text-lg">
+                                    {isCompleted ? '✓' : isUnlocked ? '🎁' : '🔒'}
+                                </div>
+
+                                {/* Component Name */}
+                                <div className="text-xs font-bold mb-1">{component.name}</div>
+
+                                {/* Description */}
+                                <div className="text-[10px] opacity-70 line-clamp-2">
+                                    {component.description}
+                                </div>
+
+                                {/* Points */}
+                                <div className="mt-2 text-[10px] font-bold text-[#00ff00]">
+                                    +{component.bonusPoints} PTS
+                                </div>
+
+                                {/* Processing State */}
+                                {isProcessing && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/80">
+                                        <div className="animate-spin text-2xl">⚡</div>
+                                    </div>
+                                )}
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
+
+            {/* Achievement Progress */}
+            {bonusUnlocked && (
+                <div className="mt-4 p-3 border-2 border-[#00ff00]/30 bg-black/30 font-mono text-xs">
+                    <div className="flex items-center justify-between">
+                        <span className="text-[#00ff00]">
+                            BONUS PROGRESS: {participant.completedBonusCards.length}/8
+                        </span>
+                        {participant.completedBonusCards.length === 8 && (
+                            <span className="text-yellow-500 animate-pulse">
+                                🎓 MASTER ACHIEVEMENT UNLOCKED!
+                            </span>
+                        )}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}

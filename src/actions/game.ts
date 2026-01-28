@@ -163,13 +163,21 @@ export async function getGameState() {
                 passcode: participant.passcode,
                 cardLayout,
                 completedComponents,
+                completedBonusCards: participant.completedBonusCards
+                    ? participant.completedBonusCards.split(',')
+                    : [],
                 bingoLines: participant.bingoLines,
+                bonusPoints: participant.bonusPoints,
                 isCompleted: participant.isCompleted,
             },
             session: participant.session ? {
                 id: participant.session.id,
                 code: participant.session.code,
                 unlockedComponents,
+                unlockedBonusCards: participant.session.unlockedBonusCards
+                    ? participant.session.unlockedBonusCards.split(',')
+                    : [],
+                bonusEnabled: participant.session.bonusEnabled,
             } : null,
             config: {
                 // This will be used by BingoGrid to render the components
