@@ -5,8 +5,9 @@
 export function generateRandomCardLayout(): string[] {
     // All 20 component IDs in pedagogical order
     const componentIds = [
-        // Basics (5)
+        // Basics (6)
         'prompting',
+        'chains',
         'llms',
         'function-calling',
         'embeddings',
@@ -26,12 +27,12 @@ export function generateRandomCardLayout(): string[] {
         'red-teaming',
         'small-models',
 
-        // Future (5)
+        // Future (4)
         'multi-agent',
         'synthetic-data',
         'flow-engineering',
         'interpretability',
-        'thinking-models',
+        // Removed 'thinking-models' to keep 20 cards total
     ];
 
     // Fisher-Yates shuffle algorithm
