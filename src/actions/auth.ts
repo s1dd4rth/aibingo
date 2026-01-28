@@ -63,22 +63,31 @@ export async function sendMagicLink(formData: z.infer<typeof LoginSchema>) {
             to: email,
             subject: '🧙‍♂️ Your Magic Link to AI Bingo',
             html: `
-                <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h2 style="color: #6366f1;">Welcome to AI Bingo Quest!</h2>
-                    <p>Click the button below to log in and start your AI learning adventure:</p>
-                    <div style="margin: 30px 0;">
-                        <a href="${link}" 
-                           style="background: #6366f1; color: white; padding: 12px 24px; 
-                                  text-decoration: none; border-radius: 6px; display: inline-block;">
-                            🚀 Log In to AI Bingo
-                        </a>
+                <div style="background-color: #0F172A; padding: 40px 20px; font-family: 'Courier New', monospace; color: #F8FAFC;">
+                    <div style="max-width: 500px; margin: 0 auto; background-color: #1E293B; border: 1px solid #334155; padding: 30px; box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 0.5);">
+                        <!-- Header -->
+                        <div style="margin-bottom: 24px; border-bottom: 1px solid #334155; padding-bottom: 16px;">
+                            <div style="color: #06B6D4; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">Authentication Protocol</div>
+                            <h1 style="color: #F8FAFC; font-size: 24px; margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; letter-spacing: -0.05em;">AI BINGO<span style="color: #F97316;">.QUEST</span></h1>
+                        </div>
+
+                        <!-- Content -->
+                        <div style="margin-bottom: 30px;">
+                            <p style="font-size: 16px; line-height: 1.5; color: #94A3B8; margin-bottom: 24px;">
+                                User_Identity verified for access request. Use the secure token below to establish connection.
+                            </p>
+                            
+                            <!-- Button -->
+                            <a href="${link}" style="display: block; box-sizing: border-box; width: 100%; text-align: center; background-color: #F97316; color: #0F172A; text-decoration: none; padding: 14px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid #EA580C; box-shadow: 4px 4px 0px 0px rgba(0,0,0,0.5);">
+                                Establish_Connection
+                            </a>
+                        </div>
+
+                        <!-- Footer -->
+                        <div style="border-top: 1px solid #334155; padding-top: 16px; font-size: 10px; color: #64748B; text-align: center; text-transform: uppercase;">
+                            Token expires in 15 minutes // Do not share
+                        </div>
                     </div>
-                    <p style="color: #666; font-size: 14px;">
-                        This link will expire in 15 minutes for security.
-                    </p>
-                    <p style="color: #666; font-size: 14px;">
-                        If you didn't request this, you can safely ignore this email.
-                    </p>
                 </div>
             `,
         });
