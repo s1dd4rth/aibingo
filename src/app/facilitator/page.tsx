@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createSession, unlockNextComponent, getFacilitatorSession, deleteSession } from '@/actions/session';
-import { GAME_COMPONENTS } from '@/lib/game-config';
-import { Trophy, Users, Unlock, CheckCircle2, Lock } from 'lucide-react';
+import { createSession, unlockNextComponent, getFacilitatorSession, deleteSession, toggleBonusCards, unlockBonusComponent } from '@/actions/session';
+import { GAME_COMPONENTS, BONUS_COMPONENTS } from '@/lib/game-config';
+import { Trophy, Users, Unlock, CheckCircle2, Lock, Star } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from "@/lib/utils";
 
@@ -13,6 +13,8 @@ interface SessionState {
         code: string;
         facilitatorEmail: string;
         unlockedComponents: string[];
+        unlockedBonusCards: string[];
+        bonusEnabled: boolean;
         participantCount: number;
     };
     participants: Array<{
@@ -20,6 +22,7 @@ interface SessionState {
         name: string | null;
         email: string;
         bingoLines: number;
+        bonusPoints: number;
         completedComponents: string;
     }>;
 }
@@ -106,6 +109,46 @@ export default function FacilitatorPage() {
         }
         setLoading(false);
     };
+
+    const handleToggleBonus = async () => {
+        if (!sessionState) return;
+
+        setLoading(true);
+        const newState = !sessionState.session.bonusEnabled;
+        const result = await toggleBonusCards(sessionState.session.id, newState);
+
+        if (result.success) {
+            // Refresh session state
+            const state = await getFacilitatorSession();
+            if ('session' in state) {
+                setSessionState(state as SessionState);
+            }
+        } else {
+            setError(result.error || 'Failed to toggle bonus cards');
+        }
+
+        setLoading(false);
+    };
+
+    const handleUnlockBonus = async (componentId: string) => {
+        if (!sessionState) return;
+
+        setLoading(true);
+        const result = await unlockBonusComponent(sessionState.session.id, componentId);
+
+        if (result.success) {
+            // Refresh session state
+            const state = await getFacilitatorSession();
+            if ('session' in state) {
+                setSessionState(state as SessionState);
+            }
+        } else {
+            setError(result.error || 'Failed to unlock bonus component');
+        }
+
+        setLoading(false);
+    };
+
 
     // Real-time subscription for session and participant updates
     useEffect(() => {
@@ -305,7 +348,80 @@ export default function FacilitatorPage() {
                     </div>
                 </div>
 
+                {/* Bonus Cards (2026 Trends) */}
+                <div className="schematic-card p-6 bg-card space-y-6">
+                    <div className="flex items-center justify-between border-b border-border pb-4">
+                        <div>
+                            <h2 className="text-2xl font-bold uppercase tracking-tight flex items-center gap-2">
+                                <Star className="w-6 h-6 text-yellow-500" />
+                                Bonus_Cards_2026
+                            </h2>
+                            <p className="text-xs text-muted-foreground mt-1 font-mono">
+                                // Optional Advanced Challenges (+50pts each)
+                            </p>
+                        </div>
+                        <button
+                            onClick={handleToggleBonus}
+                            disabled={loading}
+                            className={cn(
+                                "px-4 py-2 border uppercase font-bold text-xs flex items-center gap-2",
+                                sessionState.session.bonusEnabled
+                                    ? 'bg-yellow-500/10 border-yellow-500 text-yellow-500 hover:bg-yellow-500/20'
+                                    : 'bg-muted/10 border-border text-muted-foreground hover:bg-muted/20'
+                            )}
+                        >
+                            {sessionState.session.bonusEnabled ? 'ENABLED' : 'DISABLED'}
+                        </button>
+                    </div>
+
+                    {sessionState.session.bonusEnabled ? (
+                        <>
+                            <div className="text-xs text-muted-foreground font-mono uppercase mb-4 p-3 border border-yellow-500/30 bg-yellow-500/5">
+                                ⚠️ Participants must complete 10 core tiles to see bonus cards
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                {BONUS_COMPONENTS.map((component) => {
+                                    const isUnlocked = sessionState.session.unlockedBonusCards.includes(component.id);
+                                    return (
+                                        <div
+                                            key={component.id}
+                                            className={cn(
+                                                "flex items-center gap-3 p-3 border",
+                                                isUnlocked
+                                                    ? 'bg-yellow-500/10 border-yellow-500'
+                                                    : 'bg-muted/5 border-border'
+                                            )}
+                                        >
+                                            {isUnlocked ? (
+                                                <CheckCircle2 className="w-5 h-5 text-yellow-500 flex-shrink-0" />
+                                            ) : (
+                                                <button
+                                                    onClick={() => handleUnlockBonus(component.id)}
+                                                    disabled={loading}
+                                                    className="p-1 hover:bg-yellow-500/10 border border-yellow-500/30 rounded disabled:opacity-50"
+                                                >
+                                                    <Star className="w-4 h-4 text-yellow-500" />
+                                                </button>
+                                            )}
+                                            <div className="flex-1 min-w-0">
+                                                <div className="font-bold text-sm uppercase truncate">{component.name}</div>
+                                                <div className="text-xs text-muted-foreground line-clamp-1">{component.description}</div>
+                                            </div>
+                                            <div className="text-xs font-mono text-yellow-500">+{component.bonusPoints}</div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </>
+                    ) : (
+                        <div className="text-center text-muted-foreground py-8 font-mono border border-dashed border-border uppercase">
+                            Bonus_Cards_Disabled
+                        </div>
+                    )}
+                </div>
+
                 {/* Participant List */}
+
                 <div className="schematic-card p-6 bg-card">
                     <h2 className="text-2xl font-bold mb-4 uppercase tracking-tight border-b border-border pb-4">Participant_Log</h2>
                     <div className="space-y-2">

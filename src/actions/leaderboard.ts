@@ -8,6 +8,7 @@ export interface LeaderboardEntry {
     name: string;
     score: number;
     bingoLines: number;
+    bonusPoints: number;
     isCompleted: boolean;
 }
 
@@ -61,7 +62,6 @@ export async function getLeaderboard(): Promise<LeaderboardData> {
         return { entries: [], sessionCode: null };
     }
 
-    // 2. Fetch Users
     const users = await prisma.participant.findMany({
         where: sessionFilter,
         select: {
@@ -69,17 +69,13 @@ export async function getLeaderboard(): Promise<LeaderboardData> {
             name: true,
             completedComponents: true,
             bingoLines: true,
-            isCompleted: true
+            bonusPoints: true,
+            isCompleted: true,
         },
-        orderBy: [
-            { bingoLines: 'desc' },
-            { isCompleted: 'desc' }
-        ],
-        take: 100
     });
 
     // 3. Compute scores
-    const leaderboard = users.map(user => {
+    const userEntries = users.map(user => {
         const completed = user.completedComponents
             ? user.completedComponents.split(',').filter(Boolean)
             : [];
@@ -87,20 +83,24 @@ export async function getLeaderboard(): Promise<LeaderboardData> {
             rawName: user.name || user.email,
             score: completed.length,
             bingoLines: user.bingoLines,
-            isCompleted: user.isCompleted
+            bonusPoints: user.bonusPoints,
+            isCompleted: user.isCompleted,
         };
     });
 
-    // 4. Sort by bingo lines first, then by score
-    leaderboard.sort((a, b) => {
+    // 4. Sort: First by bingo lines (desc), then by bonus points (desc), then by core completed (desc)
+    const sortedUsers = userEntries.sort((a, b) => {
         if (b.bingoLines !== a.bingoLines) {
             return b.bingoLines - a.bingoLines;
+        }
+        if (b.bonusPoints !== a.bonusPoints) {
+            return b.bonusPoints - a.bonusPoints;
         }
         return b.score - a.score;
     });
 
     // 5. Mask emails
-    const entries = leaderboard.map((entry, index) => {
+    const entries = sortedUsers.map((entry, index) => {
         let displayName = entry.rawName;
         // Don't mask if it looks like a real name (no @)
         // If it is an email, mask it
@@ -118,6 +118,7 @@ export async function getLeaderboard(): Promise<LeaderboardData> {
             name: displayName,
             score: entry.score,
             bingoLines: entry.bingoLines,
+            bonusPoints: entry.bonusPoints,
             isCompleted: entry.isCompleted
         };
     });
