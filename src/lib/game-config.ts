@@ -122,30 +122,31 @@ print(f"Vector length: {len(result.embeddings[0].values)}")
 print(f"First 5 numbers: {result.embeddings[0].values[:5]}")`
     },
     {
-        id: 'context-window',
-        name: 'Context Window',
+        id: 'rules-regex',
+        name: 'Rules & Regex',
         period: 'Basics',
         tier: 'core',
-        family: 'Memory',
-        description: 'The working memory limit (input size).',
-        docUrl: 'https://ai.google.dev/gemini-api/docs/tokens',
-        why: "Models don't have infinite memory. They can only see what fits in their 'window'.",
-        what: "The maximum number of tokens (text parts) the model can process in a single request.",
-        how: "By managing token counts and sliding windows to ensure important information stays in view.",
+        family: 'Safety',
+        description: 'Basic deterministic keyword filters.',
+        docUrl: 'https://ai.google.dev/gemini-api/docs/safety-settings',
+        why: "AI is unpredictable. Sometimes you need hard guarantees.",
+        what: "Traditional software logic used to catch obvious bad inputs or outputs.",
+        how: "Using standard programming patterns (if/else, Regex) to block specific words or patterns.",
         codeSnippet: `# Prerequisite: Ensure you've run the "Quick Setup" above to init 'client'
-# Count tokens to check if we fit in the window
-text = "The quick brown fox jumps over the lazy dog." * 100
+import re
 
-# Get model info
-model_info = client.models.get(model='gemini-2.0-flash-exp')
-print(f"Model Limit: {model_info.input_token_limit} tokens")
-
-# Count tokens
-count = client.models.count_tokens(
+# Generate a response
+response = client.models.generate_content(
     model='gemini-2.0-flash-exp',
-    contents=text
+    contents="Tell me a secret password."
 )
-print(f"Current Usage: {count.total_tokens} tokens")`
+response_text = response.text
+
+# Safety Rule: Block if it looks like a credit card (simplified regex)
+if re.search(r"\\b\\d{4}[- ]?\\d{4}[- ]?\\d{4}[- ]?\\d{4}\\b", response_text):
+    print("Blocked: Sensitive info detected.")
+else:
+    print(response_text)`
     },
     {
         id: 'chains',
