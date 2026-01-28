@@ -107,19 +107,46 @@ export default function FacilitatorPage() {
         setLoading(false);
     };
 
-    // Poll for updates every 5 seconds
+    // Real-time subscription for session and participant updates
     useEffect(() => {
         if (!sessionState) return;
 
-        const interval = setInterval(async () => {
-            const state = await getFacilitatorSession();
-            if ('session' in state) {
-                setSessionState(state as SessionState);
-            }
-        }, 5000);
+        // Import Supabase helpers dynamically (client-side only)
+        let unsubscribeSession: (() => void) | undefined;
+        let unsubscribeParticipants: (() => void) | undefined;
 
-        return () => clearInterval(interval);
-    }, [sessionState]);
+        const setupRealtime = async () => {
+            const { subscribeToSession, subscribeToParticipants } = await import('@/lib/supabase');
+
+            // Subscribe to session changes (unlocked components, etc.)
+            unsubscribeSession = subscribeToSession(sessionState.session.id, async (payload) => {
+                console.log('Session updated:', payload);
+                // Refresh full state when session changes
+                const state = await getFacilitatorSession();
+                if ('session' in state) {
+                    setSessionState(state as SessionState);
+                }
+            });
+
+            // Subscribe to participant changes (joins, completions, etc.)
+            unsubscribeParticipants = subscribeToParticipants(sessionState.session.id, async (payload) => {
+                console.log('Participants updated:', payload);
+                // Refresh full state when participants change
+                const state = await getFacilitatorSession();
+                if ('session' in state) {
+                    setSessionState(state as SessionState);
+                }
+            });
+        };
+
+        setupRealtime();
+
+        return () => {
+            // Cleanup subscriptions
+            if (unsubscribeSession) unsubscribeSession();
+            if (unsubscribeParticipants) unsubscribeParticipants();
+        };
+    }, [sessionState?.session.id]); // Only re-subscribe if session ID changes
 
     if (loading) {
         return (

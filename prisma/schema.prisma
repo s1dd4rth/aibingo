@@ -17,6 +17,9 @@ model Session {
   updatedAt           DateTime @updatedAt
   
   participants        Participant[]
+  
+  // Index for faster facilitator queries
+  @@index([facilitatorEmail])
 }
 
 model Participant {
@@ -42,4 +45,8 @@ model Participant {
   
   joinedAt              DateTime @default(now())
   updatedAt             DateTime @updatedAt
+  
+  // Indexes for faster queries
+  @@index([sessionId])
+  @@index([email])
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { GAME_COMPONENTS } from '@/lib/game-config';
 import { markComponentComplete } from '@/actions/game';
 import BingoCard from './BingoCard';
@@ -16,6 +16,7 @@ interface BingoGridProps {
         bingoLines: number;
     };
     session?: {
+        id: string;
         unlockedComponents: string[];
     } | null;
 }
@@ -24,6 +25,30 @@ export default function BingoGrid({ participant, session }: BingoGridProps) {
     const [selectedComponentId, setSelectedComponentId] = useState<string | null>(null);
     const [isCompleting, setIsCompleting] = useState(false);
     const router = useRouter();
+
+    // Real-time subscription to session updates (for unlocked components)
+    useEffect(() => {
+        if (!session?.id) return;
+
+        let unsubscribe: (() => void) | undefined;
+
+        const setupRealtime = async () => {
+            const { subscribeToSession } = await import('@/lib/supabase');
+
+            // Subscribe to session changes (facilitator unlocking components)
+            unsubscribe = subscribeToSession(session.id, async (payload) => {
+                console.log('Session updated (participant view):', payload);
+                // Refresh the page to get latest unlocked components
+                router.refresh();
+            });
+        };
+
+        setupRealtime();
+
+        return () => {
+            if (unsubscribe) unsubscribe();
+        };
+    }, [session?.id, router]);
 
     // Get all components as a map for quick lookup
     const componentMap = new Map(
