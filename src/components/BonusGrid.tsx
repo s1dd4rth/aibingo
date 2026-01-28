@@ -44,6 +44,11 @@ export default function BonusGrid({ participant, session }: BonusGridProps) {
         return null;
     }
 
+    // Hide entire bonus section if facilitator hasn't enabled it
+    if (!session.bonusEnabled) {
+        return null;
+    }
+
     return (
         <div className="mt-8 border-t-2 border-[#00ff00] pt-6">
             {/* Header */}
@@ -56,16 +61,13 @@ export default function BonusGrid({ participant, session }: BonusGridProps) {
                 </div>
             </div>
 
-            {/* Lock Message */}
-            {!session.bonusEnabled && (
-                <div className="p-4 border-2 border-[#ff0000] bg-black/50 font-mono text-[#ff0000]">
-                    🔒 LOCKED BY FACILITATOR
-                </div>
-            )}
-
-            {session.bonusEnabled && !bonusUnlocked && (
-                <div className="p-4 border-2 border-yellow-500 bg-black/50 font-mono text-yellow-500">
-                    ⚠️ COMPLETE 10 CORE TILES TO UNLOCK ({coreProgress}/10)
+            {/* Challenge Message - Show when enabled but not enough core tiles */}
+            {!bonusUnlocked && (
+                <div className="p-6 border-2 border-yellow-500 bg-yellow-500/10 font-mono text-center">
+                    <div className="text-xl text-yellow-500 mb-2">🏆 COMPLETE THE CHALLENGE TO UNLOCK BONUS</div>
+                    <div className="text-sm text-yellow-300">
+                        Progress: {coreProgress}/10 core tiles completed
+                    </div>
                 </div>
             )}
 
@@ -76,7 +78,7 @@ export default function BonusGrid({ participant, session }: BonusGridProps) {
                 </div>
             )}
 
-            {/* Bonus Grid (4 cols x 2 rows) */}
+            {/* Bonus Grid (4 cols x 2 rows) - Only show when unlocked */}
             {bonusUnlocked && (
                 <div className="grid grid-cols-4 gap-3">
                     {BONUS_COMPONENTS.map((component) => {
