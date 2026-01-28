@@ -174,33 +174,7 @@ response2 = client.models.generate_content(
 )
 print(f"Haiku:\\n{response2.text}")`
     },
-    {
-        id: 'rules-regex',
-        name: 'Rules & Regex',
-        period: 'Basics',
-        tier: 'core',
-        family: 'Safety',
-        description: 'Basic deterministic keyword filters.',
-        docUrl: 'https://ai.google.dev/gemini-api/docs/safety-settings',
-        why: "AI is unpredictable. Sometimes you need hard guarantees.",
-        what: "Traditional software logic used to catch obvious bad inputs or outputs.",
-        how: "Using standard programming patterns (if/else, Regex) to block specific words or patterns.",
-        codeSnippet: `# Prerequisite: Ensure you've run the "Quick Setup" above to init 'client'
-import re
 
-# Generate a response
-response = client.models.generate_content(
-    model='gemini-2.0-flash-exp',
-    contents="Tell me a secret password."
-)
-response_text = response.text
-
-# Safety Rule: Block if it looks like a credit card (simplified regex)
-if re.search(r"\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b", response_text):
-    print("Blocked: Sensitive info detected.")
-else:
-    print(response_text)`
-    },
     {
         id: 'llms',
         name: 'LLMs',
