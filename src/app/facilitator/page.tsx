@@ -240,8 +240,12 @@ export default function FacilitatorPage() {
         );
     }
 
+    // Filter out 'thinking-models' as it was removed from the participant bingo card to fit the 5x4 grid
+    const activeComponents = allComponents.filter(c => c.id !== 'thinking-models');
+
+    // Calculate progress based on active components (20 total)
     const unlockedSet = new Set(sessionState.session.unlockedComponents);
-    const nextToUnlock = allComponents.find(c => !unlockedSet.has(c.id));
+    const nextToUnlock = activeComponents.find(c => !unlockedSet.has(c.id));
 
     return (
         <div className="min-h-screen bg-background text-foreground p-8 font-sans relative">
@@ -293,7 +297,7 @@ export default function FacilitatorPage() {
                     <div className="flex items-center justify-between border-b border-border pb-4">
                         <h2 className="text-2xl font-bold uppercase tracking-tight">System_Progression</h2>
                         <div className="text-muted-foreground font-mono">
-                            [{sessionState.session.unlockedComponents.length} / {allComponents.length}] UNLOCKED
+                            [{sessionState.session.unlockedComponents.length} / {activeComponents.length}] UNLOCKED
                         </div>
                     </div>
 

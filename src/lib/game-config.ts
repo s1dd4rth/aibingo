@@ -883,56 +883,7 @@ if candidate.safety_ratings:
 else:
     print("✅ Safety: All Clear")`
     },
-    {
-        id: 'thinking-models',
-        name: 'Thinking Models',
-        period: 'Future',
-        tier: 'core',
-        family: 'Brains',
-        description: 'Models that reason (Chain of Thought) first.',
-        docUrl: 'https://ai.google.dev/gemini-api/docs/thinking',
-        why: "Quick answers are prone to errors in math or logic. 'System 2' thinking requires pausing.",
-        what: "Models that generate a hidden 'chain of thought' or reasoning trace before outputting the final answer.",
-        how: "By training the model to emit a stream of reasoning tokens (often hidden) where it works through the problem step-by-step.",
-        codeSnippet: `# Prerequisite: Ensure 'client' is initialized
-from google.genai import types
 
-# 1. Ask a logic puzzle that benefits from reasoning
-prompt = """
-Three light switches are outside a closed room. 
-One corresponds to the light bulb inside. 
-You can flip the switches as much as you want, but you can enter the room only once. 
-How do you determine which switch controls the light?
-"""
-
-print(f"🧩 Riddle: {prompt.strip()}")
-print("\\n🤔 Thinking... (This captures the model's inner monologue)\\n")
-
-# 2. Generate with Thinking Config enabled
-# 'include_thoughts=True' reveals the hidden reasoning
-# Using Gemini 3.0 Flash Preview for Native Thinking
-response = client.models.generate_content(
-    model='gemini-3-flash-preview', 
-    contents=prompt,
-    config=types.GenerateContentConfig(
-        thinking_config=types.ThinkingConfig(
-            include_thoughts=True
-        )
-    )
-)
-
-# 3. Parse Thoughts vs Answer
-# Output parts can be "thought" parts or text parts
-# Note: Native thinking parts often come as separate candidates or parts with 'thought=True'
-for part in response.candidates[0].content.parts:
-    if part.thought:
-        print(f"🧠 Thought Trace:\\n{part.text}\\n")
-    else:
-        print(f"🗣️ Final Answer:\\n{part.text}")
-
-print("\\n✨ See how the model 'simulated' the scenario before answering?")`
-
-    },
 ];
 
 // === BONUS COMPONENTS (2026 TRENDS) ===
@@ -1312,6 +1263,56 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
 for result in results:
     print(f"Branch {result['branch']} completed!")
     # Manually review diff and merge best ones`
+    },
+    {
+        id: 'thinking-models',
+        name: 'Thinking Models',
+        period: 'Future',
+        tier: 'bonus',
+        family: 'Brains',
+        bonusPoints: 50,
+        description: 'Models that reason (Chain of Thought) first.',
+        docUrl: 'https://ai.google.dev/gemini-api/docs/thinking',
+        why: "Quick answers are prone to errors in math or logic. 'System 2' thinking requires pausing.",
+        what: "Models that generate a hidden 'chain of thought' or reasoning trace before outputting the final answer.",
+        how: "By training the model to emit a stream of reasoning tokens (often hidden) where it works through the problem step-by-step.",
+        codeSnippet: `# Prerequisite: Ensure 'client' is initialized
+from google.genai import types
+
+# 1. Ask a logic puzzle that benefits from reasoning
+prompt = """
+Three light switches are outside a closed room. 
+One corresponds to the light bulb inside. 
+You can flip the switches as much as you want, but you can enter the room only once. 
+How do you determine which switch controls the light?
+"""
+
+print(f"🧩 Riddle: {prompt.strip()}")
+print("\\n🤔 Thinking... (This captures the model's inner monologue)\\n")
+
+# 2. Generate with Thinking Config enabled
+# 'include_thoughts=True' reveals the hidden reasoning
+# Using Gemini 3.0 Flash Preview for Native Thinking
+response = client.models.generate_content(
+    model='gemini-3-flash-preview', 
+    contents=prompt,
+    config=types.GenerateContentConfig(
+        thinking_config=types.ThinkingConfig(
+            include_thoughts=True
+        )
+    )
+)
+
+# 3. Parse Thoughts vs Answer
+# Output parts can be "thought" parts or text parts
+# Note: Native thinking parts often come as separate candidates or parts with 'thought=True'
+for part in response.candidates[0].content.parts:
+    if part.thought:
+        print(f"🧠 Thought Trace:\\n{part.text}\\n")
+    else:
+        print(f"🗣️ Final Answer:\\n{part.text}")
+
+print("\\n✨ See how the model 'simulated' the scenario before answering?")`
     },
 ];
 
