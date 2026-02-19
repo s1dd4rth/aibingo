@@ -41,14 +41,14 @@ jest.mock('../components/BingoCard', () => {
 });
 
 const mockComponents: GameComponent[] = [
-    { id: '1', name: 'Comp 1', period: 'Basics', family: 'Actions', description: 'Desc 1' },
-    { id: '2', name: 'Comp 2', period: 'Combos', family: 'Memory', description: 'Desc 2' },
+    { id: '1', name: 'Comp 1', period: 'Basics', family: 'Actions', description: 'Desc 1', tier: 'core' },
+    { id: '2', name: 'Comp 2', period: 'Combos', family: 'Memory', description: 'Desc 2', tier: 'core' },
 ];
 
 jest.mock('../lib/game-config', () => ({
     GAME_COMPONENTS: [
-        { id: '1', name: 'Comp 1', period: 'Basics', family: 'Actions', description: 'Desc 1' },
-        { id: '2', name: 'Comp 2', period: 'Combos', family: 'Memory', description: 'Desc 2' },
+        { id: '1', name: 'Comp 1', period: 'Basics', family: 'Actions', description: 'Desc 1', tier: 'core' },
+        { id: '2', name: 'Comp 2', period: 'Combos', family: 'Memory', description: 'Desc 2', tier: 'core' },
     ],
 }));
 

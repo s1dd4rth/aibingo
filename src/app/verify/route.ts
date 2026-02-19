@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     try {
         // Verify JWT token
         console.log('🔍 Attempting to verify token...');
-        const email = verifyMagicLinkToken(token);
+        const email = verifyMagicLinkToken(token)?.toLowerCase();
 
         if (!email) {
             // Token is invalid or expired
@@ -57,14 +57,13 @@ export async function GET(request: NextRequest) {
 
         console.log('✅ User authenticated:', email);
 
-        return NextResponse.redirect(new URL('/game', request.url));
-
     } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         console.error('❌ Verification error:', error);
         console.error('Error details:', {
-            message: error instanceof Error ? error.message : 'Unknown error',
+            message: errorMessage,
             stack: error instanceof Error ? error.stack : undefined,
         });
-        return NextResponse.redirect(new URL('/?error=verification-failed', request.url));
+        return NextResponse.redirect(new URL(`/?error=verification-failed&details=${encodeURIComponent(errorMessage)}`, request.url));
     }
 }

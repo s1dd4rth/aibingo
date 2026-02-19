@@ -11,7 +11,7 @@ jest.mock('next/link', () => {
 jest.mock('../actions/leaderboard', () => ({
     getLeaderboard: jest.fn().mockResolvedValue({
         entries: [
-            { rank: 1, name: 'Updated P1', score: 10, bingoLines: 2, isCompleted: false }
+            { rank: 1, name: 'Updated P1', score: 10, bingoLines: 2, isCompleted: false, bonusPoints: 0 }
         ],
         sessionCode: 'TEST12'
     })
@@ -20,8 +20,8 @@ jest.mock('../actions/leaderboard', () => ({
 describe('LeaderboardView Component', () => {
     const mockInitialData = {
         entries: [
-            { rank: 1, name: 'Player 1', score: 5, bingoLines: 1, isCompleted: false },
-            { rank: 2, name: 'Player 2', score: 20, bingoLines: 0, isCompleted: true }
+            { rank: 1, name: 'Player 1', score: 5, bingoLines: 1, isCompleted: false, bonusPoints: 0 },
+            { rank: 2, name: 'Player 2', score: 20, bingoLines: 0, isCompleted: true, bonusPoints: 10 }
         ],
         sessionCode: 'TEST12'
     };
