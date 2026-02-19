@@ -7,6 +7,8 @@ import BrandHeader from '@/components/BrandHeader';
 import GameView from '@/components/GameView';
 import { redirect } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 export default async function GamePage() {
     const state = await getGameState();
 
